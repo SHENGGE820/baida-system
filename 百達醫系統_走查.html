@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>百達醫系統走查</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#1c1c1a; --muted:#6b6a64; --line:#e2e0d8;
+  --accent:#1f5f8b; --accent-soft:#e6eff6;
+  --red:#b3261e; --red-soft:#fbe9e7; --amber:#9a6700; --amber-soft:#fdf3dc;
+  --green:#2e6b3a; --green-soft:#e6f2e8; --chip:#efede6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e;
+    --accent:#7fb3da; --accent-soft:#1d2c38;
+    --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+    --green:#9fd0a8; --green-soft:#1d2e21; --chip:#2a2a27;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e;
+  --accent:#7fb3da; --accent-soft:#1d2c38;
+  --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+  --green:#9fd0a8; --green-soft:#1d2e21; --chip:#2a2a27;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.65 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:28px;margin:0 0 6px;letter-spacing:.02em}
+h2{font-size:19px;margin:40px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+h3{font-size:16px;margin:0 0 8px}
+a{color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:14px}
+.meta b{color:var(--ink);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.lead{font-size:16px;margin:16px 0 0}
+code,.mono{font-family:Consolas,"Cascadia Mono",monospace;font-size:13px;background:var(--chip);padding:1px 5px;border-radius:4px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.muted{color:var(--muted)}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:14px}
+.chain{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+.node{background:var(--card);border:1.5px solid var(--ink);border-radius:8px;padding:8px 12px;min-width:120px}
+.node .who{display:block;font-size:12px;color:var(--muted)}
+.node.todo{border-style:dashed;color:var(--muted);border-color:var(--muted)}
+.node.hub{background:var(--accent-soft);border-color:var(--accent)}
+.arr{align-self:center;color:var(--muted);font-size:18px}
+.branches{display:flex;flex-direction:column;gap:8px;margin-left:24px;padding-left:16px;border-left:2px solid var(--accent)}
+
+/* status chips */
+.states{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:8px 0 4px}
+.st{background:var(--chip);border-radius:999px;padding:1px 10px;font-size:13px;white-space:nowrap}
+.states .to{color:var(--muted);font-size:12px}
+.tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;background:var(--chip);color:var(--muted);margin-left:6px;vertical-align:2px}
+
+/* issues */
+.issue{border-left:4px solid var(--line);}
+.issue.high{border-left-color:var(--red)}
+.issue.mid{border-left-color:var(--amber)}
+.issue.low{border-left-color:var(--accent)}
+.sev{font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin-right:6px}
+.high .sev{background:var(--red-soft);color:var(--red)}
+.mid .sev{background:var(--amber-soft);color:var(--amber)}
+.low .sev{background:var(--accent-soft);color:var(--accent)}
+.issue p{margin:6px 0 0}
+.fix{margin-top:8px;font-size:14px}
+.fix b{color:var(--green)}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--chip);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.r-bad{color:var(--red);font-weight:600;white-space:nowrap}
+.r-warn{color:var(--amber);font-weight:600;white-space:nowrap}
+.r-skip{color:var(--muted);white-space:nowrap}
+.tbl{overflow-x:auto}
+td.mono{background:none;border-radius:0;padding:8px 12px}
+ol.todo{padding-left:22px}
+ol.todo li{margin:6px 0}
+.note{margin-top:12px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>百達醫系統（BKE）走查</h1>
+<div class="meta">
+  <span><b>網址</b> <a href="https://erp.example.com/dashboard">erp.example.com</a></span>
+  <span><b>日期</b> 2026-11-25</span>
+  <span><b>帳號</b> demo01（業務、業助）</span>
+  <span><b>階段</b> 第一期：PLM 研發接單→報價、打樣＋基本資料；採購、生產、出貨、財務尚未上線</span>
+</div>
+<p class="lead">業務接客戶保健食品需求 → 營養師配方估成本 → 業務報價 → 研發打樣、調料 → 營養師出營養標示。</p>
+
+<h2>主流程</h2>
+<div class="card flow">
+  <div class="chain">
+    <div class="node">客戶需求單<span class="who">業務</span></div><span class="arr">→</span>
+    <div class="node">需求待辦<span class="who">營養師收單／退回</span></div><span class="arr">→</span>
+    <div class="node hub">配方估價單<span class="who">營養師</span></div>
+  </div>
+  <div class="branches">
+    <div class="chain">
+      <div class="node">報價單<span class="who">業務</span></div><span class="arr">→</span>
+      <div class="node">送出給客戶</div><span class="arr">→</span>
+      <div class="node">客戶確認／逾期</div>
+    </div>
+    <div class="chain">
+      <div class="node">打樣單</div><span class="arr">→</span>
+      <div class="node">送研發</div><span class="arr">→</span>
+      <div class="node">開始打樣</div><span class="arr">→</span>
+      <div class="node">已出樣</div><span class="arr">→</span>
+      <div class="node">結案</div>
+    </div>
+    <div class="chain" style="margin-left:24px">
+      <div class="node">研發調料申請<span class="who">研發</span></div><span class="arr">→</span>
+      <div class="node">採購待辦<span class="who">採購：廠商、到料日</span></div>
+    </div>
+    <div class="chain">
+      <div class="node">營養素計算單<span class="who">營養師・營養標示</span></div>
+    </div>
+  </div>
+  <div class="chain">
+    <div class="node todo">彙辦單（未完成）</div>
+    <div class="node todo">BOM 前置（未完成）</div>
+    <div class="node todo">欄位片語（未完成）</div>
+  </div>
+</div>
+
+<h2>流程不順的地方</h2>
+<div class="grid">
+
+  <div class="card issue high">
+    <h3><span class="sev">卡死</span>第一步就開不了需求單</h3>
+    <p>「負責營養師」必填，但業務讀 <code>/api/core/users/</code>、<code>/api/core/companies/</code> 都回 403，公司、業務、營養師下拉全空（只顯示代號 2、3）。整條流程的起點被擋住。</p>
+    <div class="fix"><b>建議</b>　業務角色開放「讀使用者／公司清單」的唯讀權限；或負責營養師改成非必填，由營養師在需求待辦「收單」時自己掛上。</div>
+  </div>
+
+  <div class="card issue high">
+    <h3><span class="sev">卡死</span>一張草稿就能擋住整張估價單</h3>
+    <p>同一張估價單有「未完結」報價單或「未結案」打樣單時不能再開新的，草稿也算。現在 admin 留的空白草稿 ME20269923005、MB26992306 就把後面的人全擋住，業務又不能處理別人的單。</p>
+    <div class="fix"><b>建議</b>　草稿不算佔用；或加「作廢」狀態，讓開單人或主管能把廢單收掉；被擋時訊息直接帶出擋住的單號＋開單人。</div>
+  </div>
+
+  <div class="card issue high">
+    <h3><span class="sev">權限顛倒</span>看不到同事，卻能刪全公司主檔</h3>
+    <p>業務讀不到使用者清單，卻可以新增／編輯／刪除貨號（12,728 筆）、倉庫、客戶、供應商。這些是全公司共用的正式資料。</p>
+    <div class="fix"><b>建議</b>　業務對貨號、倉庫、供應商改唯讀；客戶可新增、編輯，刪除交給管理員。</div>
+  </div>
+
+  <div class="card issue mid">
+    <h3><span class="sev">繞遠路</span>打樣後改配方要回兩層</h3>
+    <p>打樣後調配方是常態，但打樣單不能改配方，要回估價單 → 反確認（填原因、記退回次數）→ 開新版本 → 估價完成 → 再次打樣。正常的研發迭代被記成「退回」。</p>
+    <div class="fix"><b>建議</b>　「因打樣調整」的反確認不計退回次數，或打樣單上直接一顆「依此結果開新配方版本」。</div>
+  </div>
+
+  <div class="card issue mid">
+    <h3><span class="sev">缺資料</span>收付款條件是空的</h3>
+    <p>收付款條件主檔 0 筆，但客戶、供應商表單都要選。新增客戶、供應商時會卡在這欄。</p>
+    <div class="fix"><b>建議</b>　上線前從 Ragic 匯入或先建常用條件（月結 30／60、貨到付款…）。</div>
+  </div>
+
+  <div class="card issue mid">
+    <h3><span class="sev">待確認</span>單據交接靠自己去待辦頁看</h3>
+    <p>提交、收單、送研發、送採購都是跨部門交接，這次走查右上角通知是空的，沒看到交接時會跳通知。系統有「提醒規則」頁，但業務帳號看不到，無法確認有沒有設。</p>
+    <div class="fix"><b>建議</b>　用管理員帳號確認提醒規則；至少「被退回」「送研發」「送採購」「到料日」要通知對方。</div>
+  </div>
+
+  <div class="card issue low">
+    <h3><span class="sev">小問題</span>營養標示做兩次</h3>
+    <p>估價單有「營養標示」頁籤，營養素計算單又算一次。兩邊數字若不同（計算單可人工改採用值），業務不容易分清哪個是正式的。</p>
+    <div class="fix"><b>建議</b>　估價單頁籤標明「試算」，正式值以計算單為準，並在估價單上顯示已開的計算單號。</div>
+  </div>
+
+  <div class="card issue low">
+    <h3><span class="sev">小問題</span>打樣費折抵沒有落點</h3>
+    <p>打樣單寫「打樣費可在正式訂單折抵」，但第一期沒有訂單模組，折抵目前只能靠人記。</p>
+  </div>
+
+  <div class="card issue low">
+    <h3><span class="sev">Bug</span>營養素計算單異動紀錄顯示 [object Object]</h3>
+    <p>營養素欄位的異動內容看不到。</p>
+  </div>
+
+</div>
+
+<h2>各單據</h2>
+<div class="grid g2">
+
+  <div class="card">
+    <h3>需求待辦<span class="tag">營養師</span></h3>
+    <div class="mono">/plm/requirement-todos</div>
+    <ul>
+      <li>按鈕：收單、退回、完成</li>
+      <li>列出業務提交、營養師退回、收單、估價中的需求單，有「剩餘天數」</li>
+      <li>從這裡開配方估價單；業務沒有這個選單</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>1. 客戶需求單<span class="tag">業務・QR20269917003</span></h3>
+    <div class="states"><span class="st">草稿</span><span class="to">→</span><span class="st">業務提交</span><span class="to">→</span><span class="st">收單</span><span class="to">→</span><span class="st">估價中</span><span class="to">→</span><span class="st">已完成</span></div>
+    <ul>
+      <li>營養師可退回；業務可結案</li>
+      <li>需求類型：配方/報價、彙辦單、單張、PPT、原料／專利／商標資料、商標授權、成分配比表、校稿</li>
+      <li>必填：需求類型、需求日期、公司、客戶、負責業務、預計截止日、負責營養師、需求主題、目標劑型、目標原料成本（或勾尚未確認）</li>
+      <li>頁籤：客戶需求（類別、族群、年齡、功能）、配方條件（指定原料、仿樣、特殊需求）、成本與劑型（客戶預計成本營養師看不到）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>2. 配方估價單<span class="tag">營養師・MA26991802</span></h3>
+    <div class="states"><span class="st">草稿</span><span class="to">⇄</span><span class="st">估價完成</span></div>
+    <ul>
+      <li>多版本 N01、N02…，選一個「採用」★</li>
+      <li>原料單價 × 用量 → ×損耗 1.1 → ＋代工費 = 總成本 → ×1.2 = 建議報價</li>
+      <li>反確認要填原因、記退回次數；完成後單價凍結</li>
+      <li>營養標示頁籤可比較各版本；右側「需求重點」面板</li>
+      <li>從這裡開：報價單、打樣單、營養素計算單</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>3. 報價單<span class="tag">業務・ME20269923005／V1</span></h3>
+    <div class="states"><span class="st">草稿</span><span class="to">→</span><span class="st">送出給客戶</span><span class="to">→</span><span class="st">客戶確認／逾期</span></div>
+    <ul>
+      <li>帶入採用版本、客戶、品名、建議報價、代工費</li>
+      <li>明細：半成品、包裝費、包材費；幣別、匯率、稅率 5%</li>
+      <li>改價用「複製開新版」V2、V3…</li>
+      <li>頁籤：明細、原料明細（只有佔比）、成分（送出時凍結）、版本、處理進度</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>4. 打樣單<span class="tag">MB26992306</span></h3>
+    <div class="states"><span class="st">草稿</span><span class="to">→</span><span class="st">送研發</span><span class="to">→</span><span class="st">開始打樣</span><span class="to">→</span><span class="st">已出樣</span><span class="to">→</span><span class="st">結案</span></div>
+    <ul>
+      <li>選版本＋廠別（只有 P01 示範廠）</li>
+      <li>價格、口味、熱量、蛋白質、數量：研發調整或指定</li>
+      <li>送研發後需求鎖定；「再次打樣」記在同一張單</li>
+      <li>頁籤：配方（不顯示成本）、打樣紀錄、調料申請、處理進度</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>5. 研發調料申請<span class="tag">MR26992308</span></h3>
+    <div class="states"><span class="st">草稿</span><span class="to">→</span><span class="st">送採購</span></div>
+    <ul>
+      <li>原料自動帶入配方；研發填需求量，採購填處理方式、廠商、到料日</li>
+      <li>需求量沒填完不能送；可拉回；採購可退回</li>
+      <li>送出後到「採購待辦」<span class="mono">/plm/purchase-todos</span>（待收單、已收單）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>6. 營養素計算單<span class="tag">營養師・NC20269923002</span></h3>
+    <ul>
+      <li>計算值／採用值（人工改要寫原因）、每 100g、每日參考值%</li>
+      <li>格式一：每份＋每日參考值%；格式二：每份＋每 100g</li>
+      <li>頁籤：營養標示、原料貢獻、彙整（葷素最嚴、效期最短、成分排序、過敏原、法規、授權）</li>
+      <li>業務只能看</li>
+    </ul>
+  </div>
+
+</div>
+
+<h2>基本檔與系統設定</h2>
+<div class="tbl"><table>
+  <tr><th>選單</th><th>內容</th><th>筆數</th></tr>
+  <tr><td>工廠別</td><td>P01 示範廠</td><td>1</td></tr>
+  <tr><td>代碼表</td><td>下拉選單的值；分組：料號、客戶與廠商、需求與配方、單據備註樣板、生產與出貨</td><td></td></tr>
+  <tr><td>貨號</td><td>原料 2,141、物料 243、包材 4,491、半成品 2,335、成品 2,149、混料 1,144、其他 225</td><td>12,728</td></tr>
+  <tr><td>貨號設定</td><td>貨號分類 7、型態分類 58、計量單位 31</td><td></td></tr>
+  <tr><td>研發參數</td><td>營養素 37、每日參考值 31、劑型 9、劑型規格 17、功能對照表</td><td></td></tr>
+  <tr><td>倉庫</td><td>編號、廠別、總倉、類型</td><td>81</td></tr>
+  <tr><td>財務設定</td><td>客戶 848、供應商 1,154、收付款條件 <b class="r-bad">0</b>、幣別 6、匯率 5、匯款銀行 4,517</td><td></td></tr>
+</table></div>
+<ul class="note">
+  <li>貨號 13 碼：類型 1 碼＋產線 2 碼＋型態 3～4 碼＋供應商／客戶 5～8 碼＋流水號 9～13 碼，建檔後不能改</li>
+  <li>原料營養資料存每 100g，來源「Ragic 匯入」</li>
+  <li>劑型：果凍、液態、粉劑、糖果、膠囊、軟膠囊、錠劑、餅乾、其他特殊劑型</li>
+</ul>
+
+<h2>業務帳號看不到的選單</h2>
+<div class="tbl"><table>
+  <tr><th>選單</th><th>網址</th><th>用途</th></tr>
+  <tr><td>公司別</td><td class="mono">/master/companies</td><td>公司主檔</td></tr>
+  <tr><td>部門</td><td class="mono">/master/departments</td><td>部門</td></tr>
+  <tr><td>使用者</td><td class="mono">/master/users</td><td>帳號、工號、部門、角色</td></tr>
+  <tr><td>角色／權限</td><td class="mono">/master/roles</td><td>角色與權限</td></tr>
+  <tr><td>提醒規則</td><td class="mono">/master/reminder-rules</td><td>到期提醒</td></tr>
+  <tr><td>操作日誌、登入紀錄</td><td class="mono">/master/audit-logs</td><td>稽核</td></tr>
+  <tr><td>代工費價目</td><td class="mono">/master/dosage-process-fees</td><td>估價單代工費來源</td></tr>
+  <tr><td>需求待辦</td><td class="mono">/plm/requirement-todos</td><td>營養師收單（頁面打得開，無選單）</td></tr>
+  <tr><td>採購待辦</td><td class="mono">/plm/purchase-todos</td><td>採購處理調料申請</td></tr>
+</table></div>
+
+<h2>走查結果</h2>
+<div class="tbl"><table>
+  <tr><th>步驟</th><th>結果</th><th>原因</th></tr>
+  <tr><td>新增客戶需求單</td><td class="r-bad">存不了</td><td>負責營養師下拉空白；使用者、公司清單 API 回 403</td></tr>
+  <tr><td>從估價單開報價單</td><td class="r-bad">被擋</td><td>已有未完結報價單 ME20269923005（admin 草稿，明細空白）</td></tr>
+  <tr><td>從估價單開打樣單</td><td class="r-bad">被擋</td><td>已有未結案打樣單 MB26992306（草稿）</td></tr>
+  <tr><td>報價單送出／客戶確認</td><td class="r-skip">沒按</td><td>admin 的單，可能會通知客戶</td></tr>
+  <tr><td>打樣送研發、調料送採購</td><td class="r-skip">沒按</td><td>admin 的單；調料需求量未填</td></tr>
+  <tr><td>彙辦單、BOM 前置、欄位片語</td><td class="r-skip">沒做</td><td>標示未完成、請勿測試</td></tr>
+  <tr><td>基本檔新增</td><td class="r-skip">只看表單</td><td>全公司共用正式資料，沒存檔</td></tr>
+  <tr><td>營養素計算單異動紀錄</td><td class="r-warn">Bug</td><td>顯示 [object Object]</td></tr>
+  <tr><td>收付款條件</td><td class="r-warn">沒資料</td><td>主檔空，客戶、供應商表單要選</td></tr>
+</table></div>
+<p class="note">這次走查沒有新增或修改任何資料。</p>
+
+<h2>要能完整走一遍，先處理</h2>
+<ol class="todo">
+  <li>確認營養師帳號有沒有建，以及業務角色能不能讀使用者、公司清單（403）。</li>
+  <li>處理測試單 QR20269917003 → MA26991802 → ME20269923005／MB26992306／MR26992308／NC20269923002：報價單結束、打樣單結案，或另開新需求單從頭走。</li>
+  <li>用營養師帳號走「收單 → 配方估價 → 估價完成 → 營養素計算單」。</li>
+</ol>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>百達醫跑流程步驟</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#fff; --ink:#1c1c1a; --muted:#6b6a64; --line:#e2e0d8; --chip:#efede6;
+  --accent:#1f5f8b; --accent-soft:#e6eff6; --red:#b3261e; --red-soft:#fbe9e7;
+  --amber:#9a6700; --amber-soft:#fdf3dc; --green:#2e6b3a; --green-soft:#e6f2e8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+    --accent:#7fb3da; --accent-soft:#1d2c38; --red:#f2a49b; --red-soft:#3a1f1c;
+    --amber:#e8c06a; --amber-soft:#352c17; --green:#9fd0a8; --green-soft:#1d2e21;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+  --accent:#7fb3da; --accent-soft:#1d2c38; --red:#f2a49b; --red-soft:#3a1f1c;
+  --amber:#e8c06a; --amber-soft:#352c17; --green:#9fd0a8; --green-soft:#1d2e21;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.7 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 6px}
+.meta{color:var(--muted);font-size:14px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:13px;background:var(--chip);padding:1px 5px;border-radius:4px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;margin-top:12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.prog{flex:1;height:8px;background:var(--chip);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .2s}
+.cnt{font-size:13px;color:var(--muted);white-space:nowrap}
+button.reset{font:inherit;font-size:13px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:2px 10px;cursor:pointer}
+
+.warn{background:var(--amber-soft);border-radius:10px;padding:12px 16px;margin-top:18px;font-size:14px}
+.warn b{color:var(--amber)}
+.warn ul{margin:4px 0 0;padding-left:20px}
+
+.stage{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:18px;break-inside:avoid-page}
+.stage h2{font-size:18px;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.no{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 6px;border-radius:8px;background:var(--ink);color:var(--bg);font-size:14px;font-family:Consolas,monospace}
+.who{font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.where{font-size:13px;color:var(--muted);margin:4px 0 8px}
+ol.steps{list-style:none;margin:0;padding:0}
+ol.steps li{display:flex;gap:10px;padding:7px 0;border-top:1px dashed var(--line)}
+ol.steps li:first-child{border-top:0}
+ol.steps input{margin-top:5px;width:17px;height:17px;flex:none;accent-color:var(--green)}
+ol.steps label{cursor:pointer}
+ol.steps li.done label{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.opt{font-size:12px;font-weight:600;color:var(--amber);background:var(--amber-soft);border-radius:4px;padding:0 6px;margin-right:4px}
+.chk{font-size:13px;color:var(--accent);display:block}
+.chk::before{content:"看：";font-weight:700}
+.btn{font-weight:600;background:var(--chip);border-radius:4px;padding:0 5px;white-space:nowrap}
+.sub{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+.sub span{font-size:13px;color:var(--muted)}
+textarea{width:100%;min-height:56px;margin-top:10px;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;resize:vertical}
+textarea::placeholder{color:var(--muted)}
+
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px;font-size:13px}
+.flow a{color:var(--ink);text-decoration:none;border:1.5px solid var(--ink);border-radius:6px;padding:2px 9px;background:var(--card)}
+.flow a:hover{background:var(--accent-soft)}
+.flow span{color:var(--muted)}
+
+.record{background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:16px 20px;margin-top:22px}
+.record h2{font-size:17px;margin:0 0 6px}
+.record ul{margin:0;padding-left:20px}
+@media print{
+  .bar,button.reset{display:none}
+  body{background:#fff}
+  textarea{min-height:70px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>百達醫系統：跑一次完整流程</h1>
+<div class="meta">
+  <span>erp.example.com</span>
+  <span>勾選與筆記只存在這台電腦的瀏覽器</span>
+</div>
+
+<div class="bar">
+  <div class="prog"><i id="pbar"></i></div>
+  <span class="cnt" id="pcnt">0 / 0</span>
+  <button class="reset" id="reset" type="button">清除勾選</button>
+</div>
+
+<div class="flow">
+  <a href="#s0">開始前</a><span>→</span>
+  <a href="#s1">需求單</a><span>→</span>
+  <a href="#s2">收單</a><span>→</span>
+  <a href="#s3">估價</a><span>→</span>
+  <a href="#s4a">報價</a><span>／</span>
+  <a href="#s4b">打樣</a><span>／</span>
+  <a href="#s4c">營養標示</a><span>→</span>
+  <a href="#s5">收尾</a>
+</div>
+
+<div class="warn">
+  <b>先知道</b>
+  <ul>
+    <li>業務帳號目前開不了需求單（負責營養師選單空白）。先請廠商修，或用管理員帳號開。</li>
+    <li>不要用舊單 MA26991802，它被 admin 的兩張草稿擋住。從新需求單開始。</li>
+  </ul>
+</div>
+
+<!-- 0 -->
+<section class="stage" id="s0">
+  <h2><span class="no">0</span>開始前</h2>
+  <ol class="steps">
+    <li><input type="checkbox" id="c0-1"><label for="c0-1">準備帳號：業務、營養師、研發、採購各一個；沒有就用管理員帳號全程跑。</label></li>
+    <li><input type="checkbox" id="c0-2"><label for="c0-2">客戶選一家測試用的。<span class="chk">報價單「送出給客戶」會不會寄信給客戶，還沒確認。</span></label></li>
+    <li><input type="checkbox" id="c0-3"><label for="c0-3">需求主題以「測試」開頭，之後好找、好清。</label></li>
+  </ol>
+  <textarea id="n0" placeholder="筆記"></textarea>
+</section>
+
+<!-- 1 -->
+<section class="stage" id="s1">
+  <h2><span class="no">1</span>開需求單<span class="who">業務</span></h2>
+  <div class="where">PLM 研發 › 客戶需求單　<code>/plm/requirements</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c1-1"><label for="c1-1">按 <span class="btn">新增</span>。</label></li>
+    <li><input type="checkbox" id="c1-2"><label for="c1-2">填必填：需求類型（配方/報價）、需求日期、公司、客戶、負責業務、預計截止日、負責營養師、需求主題、目標劑型、目標原料成本。<span class="chk">公司、業務、營養師顯示名字還是代號。</span></label></li>
+    <li><input type="checkbox" id="c1-3"><label for="c1-3">三個頁籤都填一些：客戶需求、配方條件（指定 1～2 個原料）、成本與劑型。</label></li>
+    <li><input type="checkbox" id="c1-4"><label for="c1-4">按 <span class="btn">存檔</span>。<span class="chk">狀態＝草稿，單號自動給（QR…）。</span></label></li>
+    <li><input type="checkbox" id="c1-5"><label for="c1-5">按提交（按鈕名稱以畫面為準）。<span class="chk">狀態＝業務提交；營養師有沒有收到通知。</span></label></li>
+  </ol>
+  <textarea id="n1" placeholder="筆記：需求單號、按鈕實際名稱、卡住的地方"></textarea>
+</section>
+
+<!-- 2 -->
+<section class="stage" id="s2">
+  <h2><span class="no">2</span>收單<span class="who">營養師</span></h2>
+  <div class="where">需求待辦　<code>/plm/requirement-todos</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c2-1"><label for="c2-1">找到剛才那張，看「剩餘天數」。</label></li>
+    <li><input type="checkbox" id="c2-2"><label for="c2-2"><span class="opt">選做</span>按 <span class="btn">退回</span> → 回業務帳號修改、再提交。<span class="chk">業務有沒有收到退回通知；狀態＝營養師退回。</span></label></li>
+    <li><input type="checkbox" id="c2-3"><label for="c2-3">按 <span class="btn">收單</span>。<span class="chk">狀態＝收單。</span></label></li>
+  </ol>
+  <textarea id="n2" placeholder="筆記"></textarea>
+</section>
+
+<!-- 3 -->
+<section class="stage" id="s3">
+  <h2><span class="no">3</span>估價<span class="who">營養師</span></h2>
+  <div class="where">從需求待辦開配方估價單　<code>/plm/estimates</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c3-1"><label for="c3-1">開配方估價單。<span class="chk">單號 MA…；需求單狀態變「估價中」。</span></label></li>
+    <li><input type="checkbox" id="c3-2"><label for="c3-2">版本 N01：選原料、填用量（mg）、選代工費。<span class="chk">原料單價、營養資料有沒有自動帶入。</span></label></li>
+    <li><input type="checkbox" id="c3-3"><label for="c3-3">再開 N02，和 N01 比成本、比目標原料成本。</label></li>
+    <li><input type="checkbox" id="c3-4"><label for="c3-4">選一版按 <span class="btn">採用</span> ★。</label></li>
+    <li><input type="checkbox" id="c3-5"><label for="c3-5">按 <span class="btn">估價完成</span>。<span class="chk">出現「單價已凍結」。</span></label></li>
+    <li><input type="checkbox" id="c3-6"><label for="c3-6"><span class="opt">選做</span>按 <span class="btn">反確認</span>，填原因，再按 <span class="btn">估價完成</span>。<span class="chk">退回次數有沒有 +1。</span></label></li>
+  </ol>
+  <textarea id="n3" placeholder="筆記：估價單號、成本數字是否合理"></textarea>
+</section>
+
+<!-- 4a -->
+<section class="stage" id="s4a">
+  <h2><span class="no">4a</span>報價<span class="who">業務</span></h2>
+  <div class="where">配方估價單 › 開報價單　<code>/plm/quotations</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c4a-1"><label for="c4a-1">按 <span class="btn">開報價單</span> → 確認視窗按 <span class="btn">開立報價單</span>。<span class="chk">帶入採用版本、客戶、品名、建議報價。</span></label></li>
+    <li><input type="checkbox" id="c4a-2"><label for="c4a-2">補明細：半成品、包裝費、包材費；幣別、匯率、稅率 5%，存檔。</label></li>
+    <li><input type="checkbox" id="c4a-3"><label for="c4a-3">看頁籤：原料明細（只有佔比）、成分、版本。</label></li>
+    <li><input type="checkbox" id="c4a-4"><label for="c4a-4"><span class="opt">選做</span>按 <span class="btn">複製開新版</span>。<span class="chk">出現 V2。</span></label></li>
+    <li><input type="checkbox" id="c4a-5"><label for="c4a-5">確認不會寄信後，按 <span class="btn">送出給客戶</span>。<span class="chk">成分有沒有凍結。</span></label></li>
+    <li><input type="checkbox" id="c4a-6"><label for="c4a-6">按 <span class="btn">客戶確認</span>（或 <span class="btn">標為逾期</span>）。</label></li>
+  </ol>
+  <textarea id="n4a" placeholder="筆記：報價單號、送出後發生什麼"></textarea>
+</section>
+
+<!-- 4b -->
+<section class="stage" id="s4b">
+  <h2><span class="no">4b</span>打樣<span class="who">業務／研發／採購</span></h2>
+  <div class="where">配方估價單 › 開打樣單　<code>/plm/sample-requests</code>；採購待辦　<code>/plm/purchase-todos</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c4b-1"><label for="c4b-1">按 <span class="btn">開打樣單</span>，選版本、廠別 P01 示範廠，填打樣需求（價格、口味、熱量、蛋白質、數量）、打樣費。<span class="chk">單號 MB…／第 1 次。</span></label></li>
+    <li><input type="checkbox" id="c4b-2"><label for="c4b-2">按 <span class="btn">送研發</span>。<span class="chk">打樣需求鎖定；研發有沒有收到通知。</span></label></li>
+    <li><input type="checkbox" id="c4b-3"><label for="c4b-3">換研發帳號，按 <span class="btn">開始打樣</span>。</label></li>
+    <li><input type="checkbox" id="c4b-4"><label for="c4b-4">按 <span class="btn">開調料申請</span>，填每項需求量，按 <span class="btn">送採購</span>。<span class="chk">原料自動帶入；需求量沒填完能不能送。</span></label></li>
+    <li><input type="checkbox" id="c4b-5"><label for="c4b-5">換採購帳號，到採購待辦按 <span class="btn">收單</span>，填處理方式、廠商、到料日。<span class="chk">研發看不看得到到料日。</span></label></li>
+    <li><input type="checkbox" id="c4b-6"><label for="c4b-6">回打樣單按 <span class="btn">已出樣</span>，在打樣紀錄填客戶反饋。</label></li>
+    <li><input type="checkbox" id="c4b-7"><label for="c4b-7"><span class="opt">選做</span>改配方：回估價單反確認 → 開 N03 → 估價完成 → 打樣單按 <span class="btn">再次打樣</span>。<span class="chk">變成第 2 次、版本 N03。</span></label></li>
+    <li><input type="checkbox" id="c4b-8"><label for="c4b-8">按 <span class="btn">結案</span>。</label></li>
+  </ol>
+  <textarea id="n4b" placeholder="筆記：打樣單號、調料單號、交接時誰收到通知"></textarea>
+</section>
+
+<!-- 4c -->
+<section class="stage" id="s4c">
+  <h2><span class="no">4c</span>營養標示<span class="who">營養師</span></h2>
+  <div class="where">配方估價單 › 營養標示頁籤 › 開營養素計算單　<code>/plm/nutrition-sheets</code></div>
+  <ol class="steps">
+    <li><input type="checkbox" id="c4c-1"><label for="c4c-1">開營養素計算單。<span class="chk">單號 NC…；估價單上顯示「已開 1 張」。</span></label></li>
+    <li><input type="checkbox" id="c4c-2"><label for="c4c-2">核對計算值；改一個採用值。<span class="chk">是不是一定要填原因。</span></label></li>
+    <li><input type="checkbox" id="c4c-3"><label for="c4c-3">看原料貢獻、彙整頁籤（葷素、效期、成分排序、過敏原）。</label></li>
+    <li><input type="checkbox" id="c4c-4"><label for="c4c-4">選標示格式（格式一或格式二），按確認。</label></li>
+    <li><input type="checkbox" id="c4c-5"><label for="c4c-5">按 <span class="btn">異動紀錄</span>。<span class="chk">還有沒有 [object Object]。</span></label></li>
+  </ol>
+  <textarea id="n4c" placeholder="筆記：計算單號、標示數字對不對"></textarea>
+</section>
+
+<!-- 5 -->
+<section class="stage" id="s5">
+  <h2><span class="no">5</span>收尾<span class="who">業務</span></h2>
+  <ol class="steps">
+    <li><input type="checkbox" id="c5-1"><label for="c5-1">回需求單看狀態。<span class="chk">自動變「已完成」，還是要按 <span class="btn">結案</span>。</span></label></li>
+    <li><input type="checkbox" id="c5-2"><label for="c5-2">報價單或打樣單還沒結束時，從同一張估價單再開一張。<span class="chk">應該被擋；記下錯誤訊息原文。</span></label></li>
+  </ol>
+  <textarea id="n5" placeholder="筆記"></textarea>
+</section>
+
+<div class="record">
+  <h2>跑完帶回來</h2>
+  <ul>
+    <li>每個按鈕的實際名稱、按下後的狀態。</li>
+    <li>每次交接，對方有沒有收到通知。</li>
+    <li>還有哪裡只顯示代號。</li>
+    <li>卡住的地方：截圖＋在哪個畫面、按了什麼。</li>
+  </ul>
+</div>
+
+</div>
+<script>
+(function(){
+  var KEY='bke-run-flow-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  var boxes=[].slice.call(document.querySelectorAll('ol.steps input[type=checkbox]'));
+  var notes=[].slice.call(document.querySelectorAll('textarea'));
+  function refresh(){
+    var n=0;
+    boxes.forEach(function(b){ b.closest('li').classList.toggle('done', b.checked); if(b.checked) n++; });
+    document.getElementById('pcnt').textContent=n+' / '+boxes.length;
+    document.getElementById('pbar').style.width=(boxes.length? n/boxes.length*100:0)+'%';
+  }
+  boxes.forEach(function(b){
+    if(state[b.id]) b.checked=true;
+    b.addEventListener('change', function(){ state[b.id]=b.checked; save(); refresh(); });
+  });
+  notes.forEach(function(t){
+    if(state[t.id]) t.value=state[t.id];
+    t.addEventListener('input', function(){ state[t.id]=t.value; save(); });
+  });
+  document.getElementById('reset').addEventListener('click', function(){
+    boxes.forEach(function(b){ b.checked=false; delete state[b.id]; }); save(); refresh();
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>

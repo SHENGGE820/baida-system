@@ -1,0 +1,318 @@
+<title>百達醫編號邏輯</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 版面：單欄報告，與修改清單同一套色票；貨號用分段數字條呈現 */
+:root{
+  --bg:#f6f5f1; --card:#fff; --ink:#1c1c1a; --muted:#6b6a64; --line:#e2e0d8; --chip:#efede6;
+  --red:#b3261e; --red-soft:#fbe9e7; --amber:#9a6700; --amber-soft:#fdf3dc;
+  --blue:#1f5f8b; --blue-soft:#e6eff6; --green:#2e6b3a; --green-soft:#e5f1e7;
+  --s1:#1f5f8b; --s2:#2e6b3a; --s3:#9a6700; --s4:#7a3e9d; --s5:#5a5953;
+  --sans:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  --mono:Consolas,"Cascadia Mono","SFMono-Regular",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+    --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+    --blue:#7fb3da; --blue-soft:#1d2c38; --green:#9fd0a8; --green-soft:#1d2e21;
+    --s1:#7fb3da; --s2:#9fd0a8; --s3:#e8c06a; --s4:#c9a2e0; --s5:#b9b8b0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+  --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+  --blue:#7fb3da; --blue-soft:#1d2c38; --green:#9fd0a8; --green-soft:#1d2e21;
+  --s1:#7fb3da; --s2:#9fd0a8; --s3:#e8c06a; --s4:#c9a2e0; --s5:#b9b8b0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+.wrap{max-width:1040px;margin:0 auto;padding-block:32px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:26px;margin:0 0 6px;text-wrap:balance}
+h2{font-size:20px;margin:40px 0 4px;text-wrap:balance}
+h3{font-size:16px;margin:24px 0 6px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--muted);font-size:14px}
+.meta b{color:var(--ink);font-weight:600}
+code,.num{font-family:var(--mono);font-size:13.5px}
+code{background:var(--chip);padding:1px 5px;border-radius:4px}
+.sub{color:var(--muted);font-size:14px;margin:0}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.tbl{overflow-x:auto;margin-top:12px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{background:var(--chip);white-space:nowrap;font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nowrap{white-space:nowrap}
+
+/* 貨號分段條 */
+.code{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 4px}
+.seg{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.seg .d{font:600 26px/1.2 var(--mono);letter-spacing:.08em;padding:6px 10px;border-radius:6px;border:2px solid currentColor;background:var(--card)}
+.seg .k{font-size:12px;color:var(--muted);text-align:center}
+.seg .v{font-size:13px;font-weight:600;text-align:center}
+.c1{color:var(--s1)} .c2{color:var(--s2)} .c3{color:var(--s3)} .c4{color:var(--s4)} .c5{color:var(--s5)}
+.seg .k,.seg .v{color:inherit}
+.seg .k{opacity:.8}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-top:12px}
+.form{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:0}
+.form h4{margin:0 0 6px;font-size:14px}
+.form h4 .num{color:var(--muted);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:12.5px;background:var(--chip);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.chip i{font-style:normal;font-family:var(--mono);color:var(--muted);margin-right:3px}
+.chip.bad{background:var(--red-soft);color:var(--red)}
+.chip.bad i{color:var(--red)}
+
+.p{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:999px;white-space:nowrap;vertical-align:2px}
+.p.h{background:var(--red-soft);color:var(--red)}
+.p.m{background:var(--amber-soft);color:var(--amber)}
+.p.l{background:var(--blue-soft);color:var(--blue)}
+
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin-top:14px;break-inside:avoid-page}
+.item h3{margin:0 0 6px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.item h3 .no{font-family:var(--mono);color:var(--muted);font-size:14px}
+.item p{margin:6px 0 0}
+.ask{margin-top:8px;font-size:14px;color:var(--blue)}
+.ask b{font-weight:600}
+
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.step{font-size:13px;padding:4px 10px;border-radius:6px;border:1.5px solid var(--ink);background:var(--card)}
+.arr{color:var(--muted)}
+
+ol.q{margin:10px 0 0;padding-left:22px}
+ol.q li{margin:6px 0}
+</style>
+
+<div class="wrap">
+
+<h1>百達醫系統編號邏輯</h1>
+<div class="meta">
+  <span><b>系統</b> erp.example.com</span>
+  <span><b>資料來源</b> 系統內全部貨號 12,728 筆、客戶 848、供應商 1,154、倉庫 81，以 demo01 讀取</span>
+  <span><b>日期</b> 2026-11-25</span>
+</div>
+
+<!-- ============ 貨號 ============ -->
+<h2>貨號（13 碼）</h2>
+
+<div class="code" aria-label="貨號 4110041800736 拆解">
+  <div class="seg c1"><span class="k">第 1 碼</span><span class="d">4</span><span class="v">類型</span><span class="k">半成品</span></div>
+  <div class="seg c2"><span class="k">第 2 碼</span><span class="d">1</span><span class="v">產線</span><span class="k">食品</span></div>
+  <div class="seg c3"><span class="k">第 3–4 碼</span><span class="d">10</span><span class="v">型態</span><span class="k">條狀</span></div>
+  <div class="seg c4"><span class="k">第 5–8 碼</span><span class="d">0418</span><span class="v">客戶／供應商</span><span class="k">示範客戶</span></div>
+  <div class="seg c5"><span class="k">第 9–13 碼</span><span class="d">00736</span><span class="v">流水號</span><span class="k">系統配號</span></div>
+</div>
+<p class="sub">畫面上的「產線（2碼）」「型態（3～4碼）」是指第幾碼，不是佔幾碼。</p>
+
+<div class="tbl"><table>
+  <thead><tr><th>位置</th><th>意義</th><th>值</th></tr></thead>
+  <tbody>
+    <tr><td class="nowrap">第 1 碼</td><td>類型</td><td>1 原料、2 物料、3 包材、4 半成品、5 成品、6 其他、7 混料</td></tr>
+    <tr><td class="nowrap">第 2 碼</td><td>產線</td><td>1 食品、2 化粧品、3 清潔用品、0 不分產線（只有「其他」用）</td></tr>
+    <tr><td class="nowrap">第 3–4 碼</td><td>型態</td><td>每個類型各一套，01 在原料是粉末、在包材是瓶器（見下方對照）</td></tr>
+    <tr><td class="nowrap">第 5–8 碼</td><td>供應商或客戶代號</td><td>原料、物料用供應商；包材、半成品、成品、混料、其他用客戶。「其他」通用項目用 0000</td></tr>
+    <tr><td class="nowrap">第 9–13 碼</td><td>流水號</td><td>每個類型各一個計數器（不是每個客戶各自從 1 開始）</td></tr>
+  </tbody>
+</table></div>
+
+<h3>型態對照（第 3–4 碼）</h3>
+<div class="forms">
+  <div class="form"><h4>1 原料 <span class="num">2,141 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>粉末</span><span class="chip"><i>02</i>液體</span><span class="chip"><i>03</i>膏狀</span><span class="chip"><i>04</i>膠體</span><span class="chip"><i>05</i>條狀</span><span class="chip"><i>06</i>塊狀</span><span class="chip"><i>07</i>粒狀</span></div></div>
+  <div class="form"><h4>2 物料 <span class="num">243 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>0號膠囊</span><span class="chip"><i>02</i>1號膠囊</span><span class="chip"><i>03</i>2號膠囊</span><span class="chip"><i>04</i>面膜紙</span></div></div>
+  <div class="form"><h4>3 包材 <span class="num">4,491 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>瓶器</span><span class="chip"><i>02</i>彩盒</span><span class="chip"><i>03</i>貼紙</span><span class="chip"><i>04</i>鋁卷</span><span class="chip"><i>05</i>耗材</span><span class="chip"><i>06</i>紙箱</span><span class="chip"><i>07</i>提袋</span><span class="chip"><i>08</i>泡殼</span><span class="chip"><i>09</i>收縮膜</span><span class="chip"><i>10</i>乾燥劑</span><span class="chip"><i>11</i>包裝袋</span><span class="chip"><i>12</i>鋁袋</span><span class="chip"><i>13</i>DM</span><span class="chip"><i>14</i>紙卡</span><span class="chip"><i>15</i>杯膜</span><span class="chip"><i>16</i>蓋子</span><span class="chip"><i>17</i>其他</span></div></div>
+  <div class="form"><h4>4 半成品 <span class="num">2,335 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>膠囊</span><span class="chip"><i>02</i>軟膠囊</span><span class="chip"><i>03</i>錠劑</span><span class="chip"><i>04</i>粉劑</span><span class="chip"><i>05</i>排裝</span><span class="chip"><i>06</i>液劑</span><span class="chip"><i>07</i>油劑</span><span class="chip"><i>08</i>乳劑</span><span class="chip"><i>09</i>膠劑</span><span class="chip"><i>10</i>條狀</span><span class="chip"><i>11</i>盒裝</span><span class="chip"><i>12</i>滴丸</span><span class="chip"><i>13</i>大袋裝</span><span class="chip"><i>14</i>袋裝-折角鋁袋</span><span class="chip"><i>15</i>杯裝</span><span class="chip"><i>16</i>瓶裝</span><span class="chip"><i>17</i>軟糖</span><span class="chip"><i>18</i>其他</span></div></div>
+  <div class="form"><h4>5 成品 <span class="num">2,149 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>盒裝</span><span class="chip"><i>02</i>瓶裝</span><span class="chip"><i>03</i>袋裝</span><span class="chip"><i>04</i>組合</span><span class="chip"><i>05</i>箱裝</span></div></div>
+  <div class="form"><h4>6 其他 <span class="num">225 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>其他</span></div></div>
+  <div class="form"><h4>7 混料 <span class="num">1,144 筆</span></h4><div class="chips">
+    <span class="chip"><i>01</i>粉劑</span><span class="chip"><i>02</i>液劑</span><span class="chip"><i>03</i>油劑</span><span class="chip"><i>04</i>乳劑</span><span class="chip"><i>05</i>膠劑</span><span class="chip bad"><i>06</i>條裝</span></div></div>
+</div>
+<p class="sub">紅色：「06 條裝」掛在混料底下，只有 2 筆用到，看起來應屬成品。</p>
+
+<h3>和實際資料比對</h3>
+<div class="stats">
+  <div class="stat"><b>100%</b><span>第 1 碼和類型一致</span></div>
+  <div class="stat"><b>12,727 / 12,728</b><span>第 2 碼產線、第 3–4 碼型態一致（例外是 6999999999999）</span></div>
+  <div class="stat"><b>99%</b><span>第 5–8 碼和掛的客戶或供應商代號一致</span></div>
+  <div class="stat"><b>0</b><span>重複的貨號</span></div>
+</div>
+
+<h3>流水號實際分布</h3>
+<div class="tbl"><table>
+  <thead><tr><th>類型</th><th>筆數</th><th>前段流水號</th><th>後段流水號</th><th>現在最大號</th></tr></thead>
+  <tbody>
+    <tr><td>1 原料</td><td class="n">2,141</td><td class="num">00001–02642</td><td>—</td><td class="num">02642</td></tr>
+    <tr><td>2 物料</td><td class="n">243</td><td class="num">00001–00623</td><td>—</td><td class="num">00623</td></tr>
+    <tr><td>3 包材</td><td class="n">4,491</td><td class="num">00001–02685</td><td class="num">07110–09177</td><td class="num">31970 <span class="p h">打錯</span></td></tr>
+    <tr><td>4 半成品</td><td class="n">2,335</td><td class="num">00007–01961</td><td class="num">07674–09059</td><td class="num">30285 <span class="p h">打錯</span></td></tr>
+    <tr><td>5 成品</td><td class="n">2,149</td><td class="num">00001–02009</td><td>少數 07237–08079</td><td class="num">08079</td></tr>
+    <tr><td>6 其他</td><td class="n">225</td><td class="num">00001–00221</td><td>—</td><td class="num">99999 <span class="p h">佔位</span></td></tr>
+    <tr><td>7 混料</td><td class="n">1,144</td><td class="num">00001–01813</td><td class="num">07684–08309</td><td class="num">88104 <span class="p h">打錯</span></td></tr>
+  </tbody>
+</table></div>
+<ul>
+  <li>包材、半成品、混料有兩段，中間 03000–06999 完全空著。</li>
+  <li>同類型內有 547 個流水號被不同客戶或供應商重複使用（例：<code>1101912300517</code> 示範薑黃粉、<code>1101934700517</code> 示範洋蔥粉）。流水號本身不唯一，整串 13 碼才唯一。</li>
+</ul>
+
+<h3>新系統取號流程</h3>
+<div class="steps">
+  <span class="step">填品名</span><span class="arr">→</span>
+  <span class="step">選類型、產線、型態</span><span class="arr">→</span>
+  <span class="step">選客戶或供應商（擇一）</span><span class="arr">→</span>
+  <span class="step">填基本單位</span><span class="arr">→</span>
+  <span class="step">按「取號存檔」</span><span class="arr">→</span>
+  <span class="step">待建 → 正式</span>
+</div>
+<ul>
+  <li>取號後類型、產線、型態、客戶或供應商都不能改，貨號不能給別筆用。</li>
+  <li>流水號欄位提示：「留空＝系統自動取最大號；手填 13 碼數字（會檢查是否已存在）」。</li>
+  <li>同一頁另一個提示：「系統配號，不能手填（業主 2026-10-01）」。</li>
+</ul>
+
+<!-- ============ 貨號問題 ============ -->
+<h2>貨號的問題</h2>
+
+<div class="item">
+  <h3><span class="no">1</span>「自動取最大號」會被打錯的舊資料帶歪<span class="p h">高</span></h3>
+  <ul>
+    <li>其他：最大號是 <code>6999999999999</code>「備註事項」的 99999，下一號 100000 是 6 碼，貨號會變 14 碼。</li>
+    <li>包材：最大號 31970（<code>3103052731970</code> 貼紙），下一號跳到 31971。</li>
+    <li>半成品 30285（<code>4107665030285</code>）、混料 88104（<code>7101046388104</code>）同樣。</li>
+  </ul>
+  <p>同類型內取最大號才會發生；如果是同前 8 碼內取最大號就不會。前端看不出是哪一種。</p>
+  <div class="ask"><b>請確認：</b>取最大號的範圍是同類型，還是同前 8 碼？</div>
+</div>
+
+<div class="item">
+  <h3><span class="no">2</span>流水號能不能手填，兩個提示互相矛盾<span class="p m">中</span></h3>
+  <p>一個寫可手填 13 碼，另一個寫不能手填（業主 2026-10-01）。</p>
+</div>
+
+<div class="item">
+  <h3><span class="no">3</span>帶英文字尾或 5 碼的供應商代號放不進 4 碼<span class="p m">中</span></h3>
+  <ul>
+    <li>66 個供應商代號是 4 碼加字尾（<code>9431C</code>、<code>9518B</code>）或 5 碼（<code>00027</code>、<code>10010F</code>），進貨號只剩前 4 碼。</li>
+    <li>在貨號裡會變成一樣：<code>9372B</code>／<code>9372C</code>、<code>9284</code>／<code>9284B</code>、<code>9157</code>／<code>9157F</code>、<code>10010F</code>／<code>10013F</code>／<code>10016F</code>。</li>
+    <li>現有 11 筆包材是這種（示範印刷 9431C、範例紙器 9518B）。</li>
+  </ul>
+</div>
+
+<div class="item">
+  <h3><span class="no">4</span>一般供應商代號只剩 187 個<span class="p m">中</span></h3>
+  <p>一般供應商用 9000–9812，到 9999 就滿；第 5–8 碼只有 4 位。</p>
+</div>
+
+<div class="item">
+  <h3><span class="no">5</span>客戶和供應商的 4 碼代號會撞<span class="p m">中</span></h3>
+  <ul>
+    <li>客戶、供應商是兩張表，477 個代號兩邊都有，其中 83 個是不同公司。例：<code>0019</code> 供應商「示範生技」、客戶「範例貿易」。</li>
+    <li>只看貨號第 5–8 碼分不出是客戶還是供應商，要靠類型判斷，但例外不少：262 筆包材掛供應商、3 筆半成品和 1 筆成品掛供應商、2 筆原料掛客戶。</li>
+  </ul>
+</div>
+
+<div class="item">
+  <h3><span class="no">6</span>個人客戶不能建貨號<span class="p l">低</span></h3>
+  <p>個人客戶代號 9–10 碼（<code>BKE1130902</code>、<code>JZ1070304</code>，共 116 個），放不進 4 碼。目前沒有貨號用到。</p>
+</div>
+
+<div class="item">
+  <h3><span class="no">7</span>舊資料錯誤<span class="p l">低</span></h3>
+  <ul>
+    <li>9 筆物料 16 碼：<code>2104938600217-BB</code> 這類，膠囊加色碼字尾。</li>
+    <li>6 筆作廢貨號長度不對：<code>110191230318</code>（12 碼）、<code>21029458000417</code>（14 碼）等。</li>
+    <li>6 筆有類型但「貨號分類」空白：<code>1101951201468</code> 示範酵母粉、<code>5101061901586</code> 示範膠原蛋白等。</li>
+    <li><code>4107665030285</code>、<code>4105078501357</code>：第 5–8 碼 6650、0785 找不到客戶，像多打或少打一位。</li>
+    <li><code>3102058120230</code>、<code>4101036210584</code>：流水號 20230、10584 不在任何一段裡。</li>
+  </ul>
+</div>
+
+<!-- ============ 單據號碼 ============ -->
+<h2>單據號碼</h2>
+<div class="tbl"><table>
+  <thead><tr><th>單據</th><th>例</th><th>格式</th><th>長度</th></tr></thead>
+  <tbody>
+    <tr><td>客戶需求單</td><td class="num">QR20269917003</td><td>QR + 西元年月日 8 碼 + 流水 3 碼</td><td class="n">13</td></tr>
+    <tr><td>報價單</td><td class="num">ME20269923005</td><td>ME + 西元年月日 8 碼 + 流水 3 碼</td><td class="n">13</td></tr>
+    <tr><td>營養素計算單</td><td class="num">NC20269923002</td><td>NC + 西元年月日 8 碼 + 流水 3 碼</td><td class="n">13</td></tr>
+    <tr><td>配方估價單</td><td class="num">MA26991802</td><td>MA + 年月日 6 碼 + 流水 2 碼</td><td class="n">10</td></tr>
+    <tr><td>打樣單</td><td class="num">MB26992306</td><td>MB + 年月日 6 碼 + 流水 2 碼</td><td class="n">10</td></tr>
+    <tr><td>研發調料申請</td><td class="num">MR26992308</td><td>MR + 年月日 6 碼 + 流水 2 碼</td><td class="n">10</td></tr>
+  </tbody>
+</table></div>
+
+<div class="item">
+  <h3><span class="no">8</span>單號兩種長度混用<span class="p m">中</span></h3>
+  <p>QR、ME、NC 是 13 碼（日流水 3 碼），MA、MB、MR 是 10 碼（日流水 2 碼，一天最多 99 張）。</p>
+</div>
+
+<div class="item">
+  <h3><span class="no">9</span>單號會跳號，刪掉的單沒有紀錄<span class="p l">低</span></h3>
+  <p>11/23 報價單只剩 1 張，單號卻是 005；打樣單是 06、調料申請是 08。看起來是刪掉的單號沒回收，系統內查不到被刪的單。</p>
+</div>
+
+<div class="item">
+  <h3><span class="no">10</span>版本寫法三種，報價單一版一個單號<span class="p l">低</span></h3>
+  <ul>
+    <li>估價單版本 N01（補 0），報價單 V1，打樣單「第 1 次」。</li>
+    <li>報價單「複製開新版」會給新的 ME 單號，再用同一個群組號串起來；同一張報價會有多個 ME 單號。</li>
+  </ul>
+</div>
+
+<!-- ============ 主檔代號 ============ -->
+<h2>其他主檔代號</h2>
+<div class="tbl"><table>
+  <thead><tr><th>主檔</th><th>代號規則</th><th>筆數</th></tr></thead>
+  <tbody>
+    <tr><td>客戶（公司）</td><td>4 碼連號 0001–0733</td><td class="n">732</td></tr>
+    <tr><td>客戶（個人）</td><td>BKE 或 JZ + 民國年 3 碼 + 月 2 碼 + 序 2 碼，例 BKE1130902（推測為 113 年 9 月第 02 位）</td><td class="n">116</td></tr>
+    <tr><td>供應商（一般）</td><td>9000–9812；部分加字尾 B、C、D、F（F 多為個人或無發票，意義未確認）</td><td class="n">672</td></tr>
+    <tr><td>供應商（同時是客戶）</td><td>沿用客戶代號 0xxx</td><td class="n">431</td></tr>
+    <tr><td>供應商（個人）</td><td>BKE、JZ 開頭，同個人客戶</td><td class="n">48</td></tr>
+    <tr><td>倉庫</td><td>A 自有倉（原料倉、總倉、報廢倉…）、B 代工廠倉（B000 示範、B001–B063）、C 大陸倉、D 客戶倉（示範客戶甲、示範客戶乙）、E 示範倉；字母分類為推測</td><td class="n">81</td></tr>
+    <tr><td>廠別</td><td>P01 示範廠</td><td class="n">1</td></tr>
+    <tr><td>計量單位</td><td>英文縮寫：g、box、btl、cap…</td><td class="n">31</td></tr>
+    <tr><td>幣別</td><td>ISO 代碼：TWD、USD、CNY、HKD、JPY、EUR</td><td class="n">6</td></tr>
+  </tbody>
+</table></div>
+
+<!-- ============ 系統外 ============ -->
+<h2>系統外的號碼（NEW【專案進度表】）</h2>
+<div class="tbl"><table>
+  <thead><tr><th>號碼</th><th>例</th><th>說明</th></tr></thead>
+  <tbody>
+    <tr><td>樣品編號</td><td>—</td><td>系統沒有欄位；建成品時品名暫用樣品編號</td></tr>
+    <tr><td>彙辦單／配比路徑</td><td class="num">0000001004321</td><td>13 碼，規則不明</td></tr>
+    <tr><td>包材暫號</td><td class="num">31040418</td><td>前 8 碼，還沒有流水號；對應新系統「待建」</td></tr>
+    <tr><td>打印批號</td><td>—</td><td>7 碼：客供產編 4 碼 + 生產年份 1 碼 + 當年批次 2 碼</td></tr>
+  </tbody>
+</table></div>
+
+<!-- ============ 待確認 ============ -->
+<h2>待確認</h2>
+<ol class="q">
+  <li>「自動取最大號」的範圍：同類型，還是同前 8 碼？</li>
+  <li>流水號能不能手填？</li>
+  <li>包材、半成品、混料的流水號 07xxx 那段從何時開始、為什麼跳過 03000–06999？</li>
+  <li>供應商代號字尾 B、C、D、F 的意思；帶字尾的供應商，貨號第 5–8 碼怎麼填？</li>
+  <li>一般供應商 9xxx 用完後怎麼編？</li>
+  <li>打錯的舊貨號（31970、30285、88104、99999）要不要修，或排除在取號計算外？</li>
+  <li>MA、MB、MR 單號要不要改成和 QR、ME、NC 一樣的 13 碼？</li>
+</ol>
+
+</div>

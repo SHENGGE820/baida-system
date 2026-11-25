@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>百達醫系統修改清單</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#fff; --ink:#1c1c1a; --muted:#6b6a64; --line:#e2e0d8; --chip:#efede6;
+  --red:#b3261e; --red-soft:#fbe9e7; --amber:#9a6700; --amber-soft:#fdf3dc;
+  --blue:#1f5f8b; --blue-soft:#e6eff6; --green:#2e6b3a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+    --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+    --blue:#7fb3da; --blue-soft:#1d2c38; --green:#9fd0a8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151514; --card:#1e1e1c; --ink:#ecebe6; --muted:#a09f98; --line:#33322e; --chip:#2a2a27;
+  --red:#f2a49b; --red-soft:#3a1f1c; --amber:#e8c06a; --amber-soft:#352c17;
+  --blue:#7fb3da; --blue-soft:#1d2c38; --green:#9fd0a8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.7 "Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 6px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--muted);font-size:14px}
+.meta b{color:var(--ink);font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:13px;background:var(--chip);padding:1px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);font-size:14px;margin-top:20px}
+th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--chip);white-space:nowrap}
+td a{color:var(--ink)}
+.p{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:999px;white-space:nowrap}
+.p.h{background:var(--red-soft);color:var(--red)}
+.p.m{background:var(--amber-soft);color:var(--amber)}
+.p.l{background:var(--blue-soft);color:var(--blue)}
+.p.q{background:var(--chip);color:var(--muted)}
+
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-top:22px;break-inside:avoid-page}
+.item h2{font-size:18px;margin:0 0 4px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.no{font-family:Consolas,monospace;color:var(--muted);font-size:15px}
+.where{font-size:13px;color:var(--muted);margin-bottom:10px}
+.row{display:grid;grid-template-columns:72px 1fr;gap:4px 12px;margin-top:8px}
+.row>b{font-size:13px;color:var(--muted);font-weight:600;padding-top:2px}
+.row ul{margin:0;padding-left:18px}
+.row li{margin:2px 0}
+.want{color:var(--green)}
+figure{margin:14px 0 0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:6px}
+.noshot{height:80px;display:flex;align-items:center;justify-content:center;background:var(--chip);border:1.5px dashed var(--muted);border-radius:6px;color:var(--muted);font-size:14px}
+figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+.shots2{display:grid;grid-template-columns:1fr;gap:10px}
+pre.log{background:var(--chip);border-radius:6px;padding:10px 12px;font:12.5px/1.55 Consolas,"Cascadia Mono",monospace;white-space:pre-wrap;word-break:break-all;margin:12px 0 0}
+pre.log mark{background:var(--red-soft);color:var(--red);padding:0 2px}
+.quote{border-left:3px solid var(--line);padding:4px 12px;margin:12px 0 0;color:var(--muted);font-size:14px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:14px 0 4px}
+.fn{display:inline-block;font-size:13px;padding:4px 10px;border-radius:6px;border:1.5px solid var(--ink);background:var(--card)}
+.fn.no{border-style:dashed;border-color:var(--red);color:var(--red)}
+.fa{color:var(--muted)}
+.legend{display:flex;gap:8px;margin:4px 0 6px}
+.legend .fn{font-size:12px;padding:1px 8px}
+@media print{
+  body{background:#fff}
+  .wrap{padding:0}
+  .item{border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>百達醫系統（BKE）修改清單</h1>
+<div class="meta">
+  <span><b>系統</b> erp.example.com（第一期 PLM）</span>
+  <span><b>測試帳號</b> demo01（業務、業助）</span>
+  <span><b>日期</b> 2026-11-25</span>
+  <span>截圖紅框為問題位置</span>
+</div>
+
+<table>
+  <tr><th>#</th><th>項目</th><th>優先</th></tr>
+  <tr><td>1</td><td><a href="#i1">業務讀不到使用者、公司清單，需求單無法建立；多處只顯示代號</a></td><td><span class="p h">高</span></td></tr>
+  <tr><td>2</td><td><a href="#i2">草稿報價單／打樣單會佔住估價單，其他人無法再開</a></td><td><span class="p h">高</span></td></tr>
+  <tr><td>3</td><td><a href="#i3">業務權限過大：可改刪主檔、可改刪別人的單</a></td><td><span class="p h">高</span></td></tr>
+  <tr><td>4</td><td><a href="#i4">打樣後改配方要回估價單反確認，並被記為退回</a></td><td><span class="p m">中</span></td></tr>
+  <tr><td>5</td><td><a href="#i5">收付款條件主檔 0 筆，客戶、供應商表單要選</a></td><td><span class="p m">中</span></td></tr>
+  <tr><td>6</td><td><a href="#i6">跨部門交接是否有通知</a></td><td><span class="p q">請確認</span></td></tr>
+  <tr><td>7</td><td><a href="#i7">營養標示在估價單、營養素計算單各算一次</a></td><td><span class="p l">低</span></td></tr>
+  <tr><td>8</td><td><a href="#i8">打樣費「可於正式訂單折抵」目前沒有訂單可折抵</a></td><td><span class="p q">請確認</span></td></tr>
+  <tr><td>9</td><td><a href="#i9">營養素計算單異動紀錄顯示 [object Object]、程式碼格式</a></td><td><span class="p l">Bug</span></td></tr>
+  <tr><td>10</td><td><a href="#i10">接單後流程（訂貨單→彙辦單→建貨號→BOM）沒有串接</a></td><td><span class="p h">高</span></td></tr>
+  <tr><td>11</td><td><a href="#i11">缺原料、建編號、BOM 申請／異動沒有申請流程</a></td><td><span class="p m">中</span></td></tr>
+  <tr><td>12</td><td><a href="#i12">「樣品編號」與打樣單號的關係</a></td><td><span class="p q">請確認</span></td></tr>
+  <tr><td>13</td><td><a href="#i13">換料比較、包材進度、樣品傳遞單是否列入規劃</a></td><td><span class="p q">請確認</span></td></tr>
+</table>
+
+<!-- 1 -->
+<div class="item" id="i1">
+  <h2><span class="no">01</span>業務讀不到使用者、公司清單，需求單無法建立<span class="p h">高</span></h2>
+  <div class="where">PLM 研發 › 客戶需求單 › 新增　<code>/plm/requirements/new</code></div>
+  <div class="row"><b>現況</b><ul>
+    <li>「負責營養師」為必填，下拉顯示 No data，需求單存不了。</li>
+    <li>「公司」「負責業務」只顯示代號 2、3。</li>
+    <li>業務帳號呼叫 <code>/api/core/users/</code>、<code>/api/core/companies/</code> 回 403。</li>
+    <li>同樣只顯示代號：打樣單「申請人員」顯示 1、打樣清單「申請人」篩選顯示 3。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>業務角色可唯讀使用者（至少營養師、業務）與公司清單。</li>
+    <li>所有下拉、欄位、篩選顯示名稱，不顯示代號。</li>
+    <li>若營養師帳號尚未建立，請一併確認。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>客戶需求單新增：負責營養師 No data，公司、負責業務顯示代號</figcaption></figure>
+</div>
+
+<!-- 2 -->
+<div class="item" id="i2">
+  <h2><span class="no">02</span>草稿報價單／打樣單會佔住估價單<span class="p h">高</span></h2>
+  <div class="where">PLM 研發 › 配方估價 MA26991802 › 開報價單、開打樣單</div>
+  <div class="row"><b>現況</b><ul>
+    <li>同一張估價單有未完結報價單或未結案打樣單時，不能再開新的；草稿也算。</li>
+    <li>admin 留下草稿報價單 ME20269923005（總金額空白）、草稿打樣單 MB26992306，其他人都開不了。</li>
+    <li>打樣清單預設只看自己的單，業務看不到擋住自己的是哪一張。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>草稿不算佔用；或新增「作廢」狀態，讓開單人／主管可收掉廢單。</li>
+    <li>被擋時訊息直接列出擋住的單號與開單人。</li>
+  </ul></div>
+  <div class="shots2">
+    <figure><div class="noshot">截圖未公開</div><figcaption>報價單清單：ME20269923005 草稿、業務 admin、總金額空白</figcaption></figure>
+    <figure><div class="noshot">截圖未公開</div><figcaption>打樣單 MB26992306：草稿；申請人員只顯示 1</figcaption></figure>
+    <figure><div class="noshot">截圖未公開</div><figcaption>打樣清單預設篩選申請人＝自己，看不到上面那張</figcaption></figure>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="item" id="i3">
+  <h2><span class="no">03</span>業務權限過大<span class="p h">高</span></h2>
+  <div class="where">基本檔 › 貨號／倉庫／客戶／供應商；PLM 研發 › 打樣試製</div>
+  <div class="row"><b>現況</b><ul>
+    <li>業務可新增、編輯、刪除貨號（12,728 筆）、倉庫、客戶、供應商，這些是全公司共用主檔。</li>
+    <li>業務打開 admin 開的打樣單 MB26992306，「編輯」「刪除」可按（未實際按下）。</li>
+    <li>公司現行規定：編號建立、BOM 申請、BOM 異動一律先登錄「業管 NEW 需求申請表」，由專人建檔；系統卻讓業務直接新增貨號。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>業務對貨號、倉庫、供應商唯讀；客戶可新增、編輯，刪除限管理員。</li>
+    <li>別人開的單據，業務只能瀏覽。</li>
+  </ul></div>
+  <div class="shots2">
+    <figure><div class="noshot">截圖未公開</div><figcaption>全部貨號：業務帳號可按新增</figcaption></figure>
+    <figure><div class="noshot">截圖未公開</div><figcaption>admin 的打樣單：業務帳號的編輯、刪除可按</figcaption></figure>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="item" id="i4">
+  <h2><span class="no">04</span>打樣後改配方要回估價單反確認，並被記為退回<span class="p m">中</span></h2>
+  <div class="where">PLM 研發 › 打樣試製 › 配方頁籤；配方估價 › 反確認</div>
+  <div class="row"><b>現況</b><ul>
+    <li>打樣單不能改配方，畫面提示：</li>
+  </ul></div>
+  <div class="quote">只列原料與用量，不顯示單價、成本。配方要改請回估價單 MA26991802 開新版本，出樣後按「再次打樣」。</div>
+  <div class="row"><b></b><ul>
+    <li>估價單「估價完成」後單價凍結，要開新版本得先反確認（填原因、記退回次數），再估價完成、回打樣單再次打樣。</li>
+    <li>打樣後調配方是正常研發流程，卻被記成退回。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>因打樣調整的反確認不計入退回次數（可加原因類別區分）。</li>
+    <li>或在打樣單提供「依打樣結果開新配方版本」，直接帶回估價單。</li>
+  </ul></div>
+  <div class="shots2">
+    <figure><div class="noshot">截圖未公開</div><figcaption>打樣單 MB26992306 配方頁籤：不能改，提示回估價單開新版本</figcaption></figure>
+    <figure><div class="noshot">截圖未公開</div><figcaption>配方估價 MA26991802：估價完成、單價已凍結；版本 N01～N03</figcaption></figure>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="item" id="i5">
+  <h2><span class="no">05</span>收付款條件主檔 0 筆<span class="p m">中</span></h2>
+  <div class="where">基本檔 › 財務設定 › 收付款條件</div>
+  <div class="row"><b>現況</b><ul>
+    <li>收付款條件沒有資料，但客戶、供應商表單都要選收付款條件。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>上線前建好常用條件（月結 30／60、貨到付款等），或從 Ragic 匯入。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>收付款條件：No data</figcaption></figure>
+</div>
+
+<!-- 6 -->
+<div class="item" id="i6">
+  <h2><span class="no">06</span>跨部門交接是否有通知<span class="p q">請確認</span></h2>
+  <div class="where">右上角通知；系統設定 › 提醒規則（業務帳號無權限）</div>
+  <div class="row"><b>現況</b><ul>
+    <li>業務提交、營養師退回、送研發、送採購都是跨部門交接；業務帳號的通知「全部」顯示沒有通知。</li>
+    <li>有「提醒規則」頁，業務帳號看不到，無法確認是否已設定。</li>
+  </ul></div>
+  <div class="row"><b>請說明</b><ul>
+    <li>以下事件是否會通知對方：需求單提交／退回、收單、送研發、已出樣、送採購、採購退回、到料日。</li>
+    <li>提醒規則由誰設定、目前設了哪些。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>右上角通知（全部）：沒有通知</figcaption></figure>
+</div>
+
+<!-- 7 -->
+<div class="item" id="i7">
+  <h2><span class="no">07</span>營養標示在兩處各算一次<span class="p l">低</span></h2>
+  <div class="where">配方估價 › 營養標示頁籤；營養素計算單</div>
+  <div class="row"><b>現況</b><ul>
+    <li>估價單的營養標示頁籤有完整標示與「複製標示文字」；營養素計算單又算一次，且可人工改採用值。兩邊數字可能不同。</li>
+    <li>估價單已顯示「已開 1 張：NC20269923002」，但標示本身沒有註明是試算。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>估價單的標示註明「試算」；已開立營養素計算單時，提示以計算單為準。</li>
+  </ul></div>
+  <div class="shots2">
+    <figure><div class="noshot">截圖未公開</div><figcaption>配方估價 MA26991802 營養標示頁籤：可直接複製標示文字</figcaption></figure>
+    <figure><div class="noshot">截圖未公開</div><figcaption>營養素計算單 NC20269923002：正式標示</figcaption></figure>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="item" id="i8">
+  <h2><span class="no">08</span>打樣費折抵沒有落點<span class="p q">請確認</span></h2>
+  <div class="where">PLM 研發 › 打樣試製 › 費用</div>
+  <div class="row"><b>現況</b><ul>
+    <li>打樣單有「打樣費」與「可於正式訂單折抵」，第一期沒有訂單模組。</li>
+  </ul></div>
+  <div class="row"><b>請說明</b><ul>
+    <li>第一期折抵怎麼記錄、之後訂單模組如何帶入。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>打樣單費用區（同第 03 項截圖）</figcaption></figure>
+</div>
+
+<!-- 9 -->
+<div class="item" id="i9">
+  <h2><span class="no">09</span>營養素計算單異動紀錄顯示錯誤<span class="p l">Bug</span></h2>
+  <div class="where">PLM 研發 › 營養素計算單 NC20269923002 › 異動紀錄　<code>/plm/nutrition-sheets/3</code></div>
+  <div class="row"><b>現況</b><ul>
+    <li><code>nutrients</code>、<code>nutrition_snapshot</code> 顯示 [object Object]。</li>
+    <li><code>per_100g</code>、<code>per_serving</code> 顯示程式格式 <code>{'ENERGY': '216.6667', …}</code>。</li>
+    <li>欄位名稱為英文代碼；客戶、營養師、劑型、公司別顯示代號。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>欄位顯示中文名稱；營養素逐項列出名稱與數值；關聯欄位顯示名稱。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>營養素計算單 NC20269923002 異動紀錄</figcaption></figure>
+  <pre class="log">2026-11-23 12:50  admin  新增
+公司別              （空） → <mark>2</mark>
+客戶                （空） → <mark>86</mark>
+<mark>per_100g</mark>            （空） → <mark>{'ENERGY': '216.6667', 'PROTEIN': '3.8095', 'FAT': '0.4762', …}</mark>
+<mark>nutrients</mark>           （空） → <mark>[object Object]、[object Object]、[object Object]、…</mark>
+劑型                （空） → <mark>7</mark>
+<mark>per_serving</mark>         （空） → <mark>{'ENERGY': '0.0455', 'PROTEIN': '0.0008', …}</mark>
+營養師              （空） → <mark>1</mark>
+<mark>nutrition_snapshot</mark>  （空） → <mark>[object Object]、[object Object]、[object Object]</mark></pre>
+  <figcaption>同一視窗往下捲的內容（節錄）</figcaption>
+</div>
+
+<!-- 10 -->
+<div class="item" id="i10">
+  <h2><span class="no">10</span>接單後流程沒有串接<span class="p h">高</span></h2>
+  <div class="where">對照公司現行「委製單流程」與 NEW【專案進度表】（Google 試算表）</div>
+  <div class="row"><b>現況</b><ul>
+    <li>系統第一期做到需求單→估價→報價→打樣；接單後的步驟都還在試算表追蹤。</li>
+    <li>彙辦單、BOM 前置標示未完成；沒有客戶訂貨單。</li>
+    <li>NEW【專案進度表】每張訂單列出要建的貨號（5 成品、4 半成品、7 混料、3 包材、2 物料、6 其他）、彙辦單／配比路徑、樣品編號，各有負責人與完成／檢視勾選。系統內沒有對應功能。</li>
+  </ul></div>
+  <div class="flow">
+    <span class="fn ok">需求單</span><span class="fa">→</span><span class="fn ok">估價</span><span class="fa">→</span><span class="fn ok">報價／打樣</span><span class="fa">→</span><span class="fn no">客戶訂貨單</span><span class="fa">→</span><span class="fn no">彙辦單</span><span class="fa">→</span><span class="fn no">建 5／4／7／3 貨號</span><span class="fa">→</span><span class="fn no">5 成品 BOM</span><span class="fa">→</span><span class="fn no">請購／採購</span>
+  </div>
+  <div class="legend"><span class="fn ok">系統已有</span><span class="fn no">系統沒有</span></div>
+  <div class="row"><b>請說明</b><ul>
+    <li>紅色虛線的步驟排在哪一期、怎麼和第一期單據串接（例如確樣後帶出訂單、訂單帶出要建的貨號清單）。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>從確樣或訂單帶出「專案」：自動列出該產品要建的各類貨號、負責人、完成／檢視狀態，取代 NEW【專案進度表】。</li>
+    <li>彙辦單、BOM 直接引用估價單採用版本的原料與用量，不用重打。</li>
+  </ul></div>
+  <figure><div class="noshot">截圖未公開</div><figcaption>NEW【專案進度表】一格＝一張訂單：左欄要建的貨號，下方彙辦單、樣品編號；右側負責人與勾選（單價已遮）</figcaption></figure>
+</div>
+
+<!-- 11 -->
+<div class="item" id="i11">
+  <h2><span class="no">11</span>缺原料、建編號、BOM 申請／異動沒有申請流程<span class="p m">中</span></h2>
+  <div class="where">客戶需求單 › 配方條件（指定原料）；基本檔 › 貨號；BOM 前置</div>
+  <div class="row"><b>現況</b><ul>
+    <li>需求單可填「公司沒有的原料」「客供原料」，但填了之後沒有往下發出建檔申請。</li>
+    <li>公司現在用「業管 NEW 需求申請表」登錄：編號申請建立、BOM 申請、BOM 異動（須寫原因：配方調整、包材變更、客戶要求、規格修改），另有「申請改 BOM」表。</li>
+  </ul></div>
+  <div class="row"><b>希望</b><ul class="want">
+    <li>系統內提供申請單：申請類型（建編號／BOM 申請／BOM 異動）、原貨號、新貨號、原因、處理狀態，由建檔人員收單處理。</li>
+    <li>需求單上的新原料、客供原料可直接轉成建編號申請；建好後估價單可選用。</li>
+  </ul></div>
+</div>
+
+<!-- 12 -->
+<div class="item" id="i12">
+  <h2><span class="no">12</span>「樣品編號」與打樣單號的關係<span class="p q">請確認</span></h2>
+  <div class="where">委製單流程第 4、6 步；打樣試製</div>
+  <div class="row"><b>現況</b><ul>
+    <li>現行流程：營養師打樣後通知業管「樣品編號」；建 5 成品編號時，品名先暫用樣品編號，印刷發包後再改。</li>
+    <li>系統只有打樣單號（MB26992306／第 1 次），沒有獨立的樣品編號欄位。</li>
+  </ul></div>
+  <div class="row"><b>請說明</b><ul>
+    <li>打樣單號是否就是樣品編號；若不是，樣品編號在哪裡產生、怎麼帶到成品貨號。</li>
+  </ul></div>
+</div>
+
+<!-- 13 -->
+<div class="item" id="i13">
+  <h2><span class="no">13</span>其他現行表單是否列入規劃<span class="p q">請確認</span></h2>
+  <div class="where">委製單進度表（Google 試算表）</div>
+  <div class="row"><b>現況</b><ul>
+    <li>同性質原料換料：比較組別、廠編、貨品編號、規格、產地、專利、效期、每克單價。</li>
+    <li>包材進度：發案、收案、刀模、審稿、進度、雲端路徑。</li>
+    <li>樣品傳遞單：工令單號、收樣編號、批號、檢驗項目（總生菌、大腸桿菌群…）、覆核人。</li>
+  </ul></div>
+  <div class="row"><b>請說明</b><ul>
+    <li>這三項是否排入後續階段；換料比較能否接在配方估價的原料選擇上。</li>
+  </ul></div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>原料清單示意</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/antd@5.21.6/dist/antd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ant-design/icons@5.5.1/dist/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<style>
+  :root{
+    --gold:#EBCA23; --ink:#3D3A39; --sider:#3D3A39; --sider-sub:#2A2726;
+    --page:#F7F5F1; --field:#FAF8F4; --line:#EAE3D5; --split:rgba(155,109,17,.13);
+  }
+  html,body{margin:0;background:var(--page);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";}
+  #root{min-height:100vh}
+  /* 側欄 */
+  .logo{padding:18px 8px 16px;border-bottom:2px solid var(--gold);}
+  .logo-in{display:inline-flex;flex-direction:column;align-items:center;width:124px}
+  .logo-mark{display:flex;align-items:center;gap:4px;height:26px}
+  .logo-mark b{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:29px;color:#fff;letter-spacing:.5px;line-height:26px}
+  .logo-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:1px;margin-top:6px}
+  .ant-layout-sider .ant-menu-dark .ant-menu-item,.ant-layout-sider .ant-menu-dark .ant-menu-submenu-title{border-radius:10px}
+  /* 頁首 */
+  .hdr{height:64px;background:#fff;display:flex;align-items:center;padding:0 24px;gap:16px}
+  .hdr h1{font-size:20px;font-weight:600;margin:0;flex:1}
+  .hdr .user{display:flex;align-items:center;gap:8px;font-size:14px}
+  /* 內容 */
+  .content{margin:16px;background:#fff;border-radius:8px;padding:16px;min-height:calc(100vh - 128px)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #F0EBE0}
+  .toolbar .sp{flex:1}
+  .formwrap{max-width:1320px}
+  .ant-input:not(.ant-input-disabled),.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled),
+  .ant-select:not(.ant-select-disabled) .ant-select-selector,.ant-input-number:not(.ant-input-number-disabled),
+  textarea.ant-input:not(.ant-input-disabled){background:var(--field)!important}
+  .ant-divider-horizontal.ant-divider-with-text::before,.ant-divider-horizontal.ant-divider-with-text::after{border-block-start-color:var(--split)!important}
+  .ant-divider-inner-text{font-size:16px;font-weight:500}
+  .div-sub{font-size:12px;font-weight:400;color:rgba(0,0,0,.45);margin-left:8px}
+  .note{font-size:14px;color:rgba(0,0,0,.45);margin:0 0 24px}
+  /* 現況：查詢條件 */
+  .qbox{background:var(--field);border:1px solid #F0EBE0;border-radius:8px;padding:16px;margin-bottom:24px}
+  .qgrid{display:grid;grid-template-columns:90px 180px 100px 270px 110px 180px;gap:12px 8px;align-items:center;font-size:14px}
+  .qgrid label{text-align:right}
+  .pagebar{display:flex;justify-content:flex-end;align-items:center;margin:12px 0}
+  .row-sel td{background:rgba(235,202,35,.16)!important}
+  .cur-title{font-size:14px;font-weight:500}
+  /* 建議版：清單 */
+  .rowlink{cursor:pointer}
+  .th{display:inline-flex;align-items:center}
+  /* 建議版：打開一筆 */
+  .dhead{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:8px;border-bottom:1px solid #F0EBE0}
+  .dleft{flex:1;min-width:280px}
+  .back{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:rgba(0,0,0,.55);cursor:pointer;margin-bottom:8px}
+  .back:hover{color:var(--ink)}
+  .dtitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:18px;font-weight:600}
+  .dcode{font-family:ui-monospace,Consolas,monospace;font-weight:600;letter-spacing:.5px}
+  .dbtns{display:flex;align-items:center;gap:8px}
+  .vf{margin-bottom:20px}
+  .vf .k{font-size:13px;color:rgba(0,0,0,.45);margin-bottom:4px}
+  .vf .v{font-size:14px;white-space:pre-wrap;line-height:1.6;min-height:22px}
+  /* 修改標註 */
+  .mk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;
+    background:#E5484D;color:#fff;font-size:11px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help;flex:none}
+  .hide-mk .mk{display:none}
+  /* 切換面板 */
+  .panel{position:fixed;right:260px;top:10px;width:340px;background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:1000;font-size:13px}
+  .panel-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #F0EBE0}
+  .panel-h .sp{flex:1}
+  .panel-b{padding:8px 12px 12px;max-height:46vh;overflow:auto}
+  .panel ol{margin:0;padding:0;list-style:none}
+  .panel li{display:flex;gap:8px;padding:6px 0;line-height:1.55}
+  .panel li .mk{margin:2px 0 0}
+  /* 營養標示（公版格式，同新增頁） */
+  .nl{max-width:620px;border:2px solid var(--ink);border-radius:4px;background:#fff;margin-bottom:24px}
+  .nl-title{font-size:18px;font-weight:700;letter-spacing:2px;padding:8px 0;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+  .nl-top{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--ink);font-size:14px}
+  .nl-top .k{width:72px}
+  .nl-t{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+  .nl-t th:not(:first-child){width:32%}
+  .nl-t th{font-weight:500;text-align:right;padding:6px 12px;border-bottom:1px solid var(--ink);white-space:nowrap}
+  .nl-t th:first-child,.nl-t td:first-child{text-align:left}
+  .nl-t td{padding:4px 12px;border-bottom:1px solid #E6E1D6;text-align:right;white-space:nowrap;height:36px}
+  .nl-t tr:last-child td{border-bottom:none}
+  .nl-t td.sub{padding-left:32px}
+  .nl-t .u{display:inline-block;width:32px;text-align:left;margin-left:6px;color:rgba(0,0,0,.65)}
+  .nut-cur{width:100%;border-collapse:collapse;font-size:14px}
+  .nut-cur th{background:#FCF3D7;font-weight:500;text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+  .nut-cur td{padding:8px;border-bottom:1px solid #F3EEE3}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const html = htm.bind(React.createElement);
+const { useState } = React;
+const {
+  ConfigProvider, Layout, Menu, Button, Input, Select, Switch, Form, Row, Col, Divider, Tabs, Tag,
+  Modal, Table, InputNumber, Radio, Space, Avatar, Segmented, Checkbox, Tooltip, Pagination, Dropdown, message
+} = antd;
+const I = icons;
+
+/* ---------- 資料：全部是假資料（倉庫公開） ---------- */
+const SUPS = {
+  '9001':['豐禾原料股份有限公司','豐禾'], '9002':['綠源生技有限公司','綠源'], '9003':['康禾貿易有限公司','康禾貿易'],
+  '9015':['晨光食品原料行','晨光'], '9021':['日昇生物科技股份有限公司','日昇生技'], '9034':['海川國際有限公司','海川'],
+  '9047':['佳品香料股份有限公司','佳品香料'], '9058':['永泰化工原料有限公司','永泰'],
+};
+const CUSS = {   // 所屬客戶（客供料）
+  '8001':['美好生活國際有限公司','美好生活'], '8002':['安心健康事業股份有限公司','安心健康'], '8010':['青田生醫有限公司','青田生醫'],
+  '8023':['晴光藥品股份有限公司','晴光'], '8031':['暖陽保健食品有限公司','暖陽'],
+};
+const FORM_NAME = {'01':'粉末','02':'液體','03':'膏狀','04':'膠體','05':'條狀','06':'塊狀','07':'粒狀'};
+// [貨號, 現況品名（原廠代碼寫在品名裡）, 建議版品名, 原廠料號, 估價單價, 營養]
+const RAW = [
+  ['1101902101858','膠原蛋白胜肽粉 RS-CP200','膠原蛋白胜肽粉','RS-CP200',2.8,true],
+  ['1101900101857','【暫停使用】可可粉 20% FH-CC020(停用)','【暫停使用】可可粉 20%(停用)','FH-CC020',0.9,true],
+  ['1101900201856','甜菜根粉 LY-BR100','甜菜根粉','LY-BR100',1.1,false],
+  ['1101903401855','益生菌 100億 HC-PB100','益生菌 100億','HC-PB100',12.5,true],
+  ['1101900301854','燕麥纖維','燕麥纖維','',0.6,false],
+  ['1101900101853','洋甘菊萃取物 10:1 FH-CM101','洋甘菊萃取物 10:1','FH-CM101',4.2,true],
+  ['1101902101852','維生素C 粉 RS-VC097','維生素C 粉','RS-VC097',0.75,true],
+  ['1101900201851','黑芝麻粉','黑芝麻粉','',0.5,true],
+  ['1101900301850','【暫停使用】海藻粉；重複貨號','【暫停使用】海藻粉；重複貨號','',0.8,false],
+  ['1101902100033','乳清蛋白粉 80% RS-WP080','乳清蛋白粉 80%','RS-WP080',1.6,true],
+  ['1101901500021','魚油粉 30% CG-FO030','魚油粉 30%','CG-FO030',3.6,true],
+  ['1101900200015','薑黃萃取物 95% LY-TM095','薑黃萃取物 95%','LY-TM095',6.8,true],
+  ['1102900200008','玻尿酸鈉 LY-HA001','玻尿酸鈉','LY-HA001',9.5,false],
+  ['1101900100002','葡萄籽萃取物 95% FH-GS095','葡萄籽萃取物 95%','FH-GS095',5.4,true],
+  ['1101900100001','綠茶萃取物 98% FH-GT098','綠茶萃取物 98%','FH-GT098',3.2,true],
+].map(([code,name,newName,vendorNo,price,nut])=>mkRow({code,name,newName,vendorNo,price,nut}));
+function mkRow(r){
+  const supCode = r.code.slice(4,8), isCus = !!CUSS[supCode], p = (isCus ? CUSS : SUPS)[supCode] || ['',''];
+  return {key:r.code, line:'食品', form:FORM_NAME[r.code.slice(2,4)]||'粉末', unit:'g', status:'正式',
+    supCode, isCus, sup:p[0], supShort:p[1], ...r};
+}
+const TOTAL = 1858;
+
+/* ---------- 兩頁連動：網址帶 v=cur（現況）／new（建議版）；新增頁存檔後帶 new=貨號 回來 ---------- */
+const QS = new URLSearchParams(location.search);
+const INIT_MODE = QS.get('v')==='cur' ? '現況' : '建議版';
+const pageUrl = (page, mode, extra='') => `${page}?v=${mode==='現況'?'cur':'new'}${extra}`;
+const NEW_ROW = QS.get('new') ? mkRow({code:QS.get('new'), name:QS.get('name')||'', newName:QS.get('name')||'',
+  vendorNo:'', price:null, nut:false, extra:{short:QS.get('short')||'', en:QS.get('en')||''}}) : null;
+if (QS.has('new')) history.replaceState(null, '', pageUrl('原料清單_示意.html', INIT_MODE));
+let curMode = INIT_MODE;
+const goNew = () => { window.location.href = pageUrl('原料新增_示意.html', curMode); };
+
+/* 打開一筆：最新那筆有完整內容，其他筆只示意版面 */
+const SAMPLE = '1101902101858';
+const DETAIL = {
+  short:'膠原胜肽',
+  en:'Collagen Peptide Powder',
+  allergen:'魚類',
+  additive:'否',
+  effect:'小分子膠原蛋白胜肽，易溶於水，常用於美容保養配方',
+  ingredients:'水解膠原蛋白（魚鱗來源）',
+  functional:'膠原蛋白胜肽 90% 以上',
+  law:'魚類來源，產品須標示過敏原「魚類」。\n每日食用量依成品配方設計，請參照成品法規。',
+};
+// [名稱, 公版單位, 系統單位, 每 100g 含量（SAMPLE）]
+const NUT8 = [['熱量','大卡','kcal',360],['蛋白質','公克','g',90.2],['脂肪','公克','g',0.3],['飽和脂肪','公克','g',0.1],
+  ['反式脂肪','公克','g',0],['碳水化合物','公克','g',0.2],['糖','公克','g',0],['鈉','毫克','mg',180]];
+const SUBNUT = ['飽和脂肪','反式脂肪','糖'];
+const opt = arr => arr.map(x=>({value:x,label:x}));
+const LINES = opt(['1 食品','2 化粧品','3 清潔用品']);
+const FORMS = opt(['01 粉末','02 液體','03 膏狀','04 膠體','05 條狀','06 塊狀','07 粒狀']);
+
+/* ---------- 修改說明 ---------- */
+const CHANGES = [
+  '一進來就列出全部原料，新建的排最上面，不用先按「查詢」。',
+  '一個搜尋框同時搜貨號、品名、原廠料號，邊打邊篩；產線、型態、供應商用下拉直接篩。原本上方 7 個查詢欄位、每欄的篩選漏斗拿掉。',
+  '「查詢」「重新整理」拿掉；「新增」改成金色主按鈕，導出、列印放旁邊。',
+  '點一下那列就打開那筆。原本單擊只是選取（刪除會亮、編輯卻不會亮），要雙擊才打開，畫面上沒有提示。',
+  '原廠料號從品名拆出來：現有不少原料把原廠代碼寫在品名尾巴，建議廠商一次整理到原廠料號欄。',
+  '規格、儲存兩欄整欄空白，先不顯示。',
+  '筆數和分頁移到表格下方。',
+  '最上方改成「← 原料清單」加上貨號、品名、狀態。原本要按「查詢」才回得去清單，也看不出現在是在清單還是在看一筆。',
+  '按鈕只放這一筆能做的：編輯、異動紀錄、列印；刪除收進「⋯」，不會比編輯還顯眼。查詢、重新整理、新增、導出不放這裡。',
+  '瀏覽時直接顯示文字，不用灰色輸入框，沒填的顯示「—」；按「編輯」才變成輸入框，按鈕換成取消、存檔。',
+  '頁籤跟新增的 6 個步驟一樣；「營養成分」頁籤併進「營養／標示」。',
+  '營養標示用公版表格顯示（同新增頁）；原本營養標示欄位顯示成「[object Object]」。',
+];
+const Mk = ({n}) => html`<${Tooltip} title=${CHANGES[n-1]}><span className="mk">${n}</span></${Tooltip}>`;
+const th = (text, n) => n ? html`<span className="th">${text}<${Mk} n=${n}/></span>` : text;
+
+/* ---------- 共用 ---------- */
+function F({label, req, tip, span=1, children}){
+  return html`<${Col} span=${span*4}>
+    <${Form.Item} label=${label} required=${req} tooltip=${tip}>${children}</${Form.Item}>
+  </${Col}>`;
+}
+const price4 = p => (p==null || p==='') ? '—' : (+p).toFixed(4);
+const formCode = r => `${r.code.slice(2,4)} ${r.form}`;
+
+/* ---------- 現況：清單 ---------- */
+function CurrentList({rows, queried, setQueried, onOpen}){
+  const [sel, setSel] = useState(null);
+  const cols = [
+    ['貨號(自家)','code',140],['品名','name'],['原廠料號','vendorNo0',110],['產線','line',80],['型態','form',80],['規格','spec',140],
+    ['基本單位','unit',110],['估價單價','price',100],['供應商','sup',140],['儲存','store',80],['營養','nut',80],['狀態','status',80],
+  ].map(([title,dataIndex,width])=>({title, dataIndex, key:dataIndex, width, sorter:true, filters:[{text:'全部',value:'all'}],
+    align: dataIndex==='price' ? 'right' : undefined,
+    render: v => dataIndex==='price' ? price4(v)
+      : dataIndex==='nut' ? (v ? html`<${Tag} color="green">有<//>` : '—')
+      : dataIndex==='status' ? html`<${Tag} color="green">${v}<//>`
+      : (v===undefined || v==='') ? '—' : v}));
+  const cell = el => html`<div>${el}</div>`;
+  return html`<div>
+    <div className="toolbar">
+      <${Button} icon=${html`<${I.SearchOutlined}/>`} onClick=${()=>setQueried(true)}>查詢<//>
+      <${Button} icon=${html`<${I.ReloadOutlined}/>`}>重新整理<//>
+      <${Button} icon=${html`<${I.PlusOutlined}/>`} onClick=${goNew}>新增<//>
+      <${Button} disabled icon=${html`<${I.EditOutlined}/>`}>編輯<//>
+      <${Button} disabled=${!sel} icon=${html`<${I.DeleteOutlined}/>`}>刪除<//>
+      <${Button} icon=${html`<${I.FileExcelOutlined}/>`}>導出<//>
+      <${Button} icon=${html`<${I.PrinterOutlined}/>`}>列印<//>
+    </div>
+    <div className="qbox"><div className="qgrid">
+      <label>貨號:</label>${cell(html`<${Input}/>`)}
+      <label>品名:</label>${cell(html`<${Input}/>`)}
+      <label>原廠料號:</label>${cell(html`<${Input}/>`)}
+      <label>產線:</label>${cell(html`<${Select} placeholder="全部" style=${{width:'100%'}} options=${LINES}/>`)}
+      <label>型態:</label>${cell(html`<${Select} placeholder="全部" style=${{width:'100%'}} options=${FORMS}/>`)}
+      <span></span><span></span>
+      <label>供應商代號:</label>${cell(html`<${Input}/>`)}
+      <label>供應商名稱:</label>${cell(html`<${Input}/>`)}
+    </div></div>
+    ${queried && html`<div className="pagebar"><${Pagination} total=${TOTAL + rows.length - RAW.length} pageSize=${50} showSizeChanger
+      showTotal=${(t,r)=>`第 ${r[0]}–${r[1]} 筆，共 ${t} 筆`}/></div>`}
+    <${Table} size="middle" columns=${cols} dataSource=${queried ? rows : []} pagination=${false}
+      locale=${{emptyText:'請輸入查詢條件後按「查詢」'}}
+      rowClassName=${r => r.key===sel ? 'row-sel' : ''}
+      onRow=${r=>({onClick:()=>setSel(r.key), onDoubleClick:()=>onOpen(r)})}/>
+  </div>`;
+}
+
+/* ---------- 現況：打開一筆 ---------- */
+function CurrentDetail({row, onBack}){
+  const d = row.code===SAMPLE ? DETAIL : (row.extra || {});
+  const di = (v, style) => html`<${Input} disabled value=${v||''} style=${style}/>`;
+  const ds = v => html`<${Select} disabled value=${v||undefined} style=${{width:'100%'}}/>`;
+  const dm = (v=[]) => html`<${Select} mode="multiple" disabled value=${v} placeholder="可複選" style=${{width:'100%'}}/>`;
+  const dq = v => html`<${Space.Compact} style=${{width:'100%'}}><${Input} disabled value=${v||''}/><${Button} disabled icon=${html`<${I.SearchOutlined}/>`}/><//>`;
+  const dt = (v, rows=2) => html`<${Input.TextArea} disabled rows=${rows} value=${v||''}/>`;
+  const objObj = row.code===SAMPLE ? Array(9).fill('[object Object]').join(',') : '';
+  const tabs = [
+    {key:'buy', label:'採購／價格', children: html`<${Row} gutter=${16}>
+      <${F} label="估價單價">${di(row.price==null ? '' : String(row.price))}<//>
+      <${F} label="單價對應單位">${ds('g 克')}<//>
+      <${F} label="單價更新日">${di()}<//>
+      <${F} label="品牌">${di()}<//>
+      <${F} label="產地">${di()}<//>
+      <${F} label="製造商">${di()}<//>
+      <${F} label="原廠料號（廠商編號）">${di()}<//>
+      <${F} label="最小採購量">${di()}<//>
+    <//>`},
+    {key:'pack', label:'包裝／外觀', children: html`<${Row} gutter=${16}>
+      <${F} label="包裝規格">${ds()}<//>
+      <${F} label="其他包裝規格">${di()}<//>
+      <${F} label="樣貌分類">${ds()}<//>
+      <${F} label="料性" span=${2}>${dm()}<//>
+    <//>`},
+    {key:'nut', label:'營養／標示', children: html`<${Row} gutter=${16}>
+      <${F} label="每一份量">${di()}<//>
+      <${F} label="份量單位">${di()}<//>
+      <${F} label="建議劑量">${di()}<//>
+      <${F} label="葷素">${ds()}<//>
+      <${F} label="過敏原" span=${2}>${dm()}<//>
+      <${F} label="添加物" span=${2}>${dm(row.code===SAMPLE ? ['否','否 '] : [])}<//>
+      <${F} label="功能分類" span=${2}>${dm()}<//>
+      <${F} label="其他功效說明" span=${3}>${dt(d.effect,3)}<//>
+      <${F} label="營養標示" span=${3}>${dt(objObj,3)}<//>
+      <${F} label="成分展開" span=${3}>${dt(d.ingredients,3)}<//>
+      <${F} label="定量成分" span=${3}>${dt('',3)}<//>
+      <${F} label="機能成分" span=${3}>${dt(d.functional,3)}<//>
+    <//>
+    <p className="note">每 100g 營養成分在頁面下方的「營養成分」頁籤，一筆一項新增。</p>`},
+    {key:'law', label:'法規／智財', children: html`<${Row} gutter=${16}>
+      <${F} label="法規" span=${6}>${dt(d.law,4)}<//>
+      <${F} label="認證" span=${3}>${dt()}<//>
+      <${F} label="專利" span=${3}>${dt()}<//>
+      <${F} label="專利證書張數">${di()}<//>
+      <${F} label="商標授權">${di()}<//>
+      <${F} label="商標授權劑量要求" span=${3}>${di()}<//>
+    <//>`},
+    {key:'store', label:'儲存／效期', children: html`<${Row} gutter=${16}>
+      <${F} label="存放方式" span=${2}>${dm()}<//>
+      <${F} label="其他存放方式">${di()}<//>
+      <${F} label="保存期限">${ds()}<//>
+      <${F} label="其他有效期限">${di()}<//>
+    <//>`},
+    {key:'nutc', label:'營養成分', children: html`<div>
+      <div style=${{display:'flex', alignItems:'center', gap:12, marginBottom:8}}>
+        維生素／礦物質／機能性含量
+        <${Radio.Group} disabled value="100" options=${[{value:'1',label:'每 1g'},{value:'100',label:'每 100g'}]}/>
+      </div>
+      <p className="note" style=${{marginBottom:8}}>八大營養素固定每 100g；系統一律換算成每 100g 存檔</p>
+      <table className="nut-cur"><thead><tr><th>營養素</th><th>類別</th><th>含量</th><th>單位</th><th>數值來源</th></tr></thead><tbody>
+        ${NUT8.map(([n,,u,v])=>html`<tr key=${n}><td>${n}</td><td>八大營養素</td>
+          <td>${row.code===SAMPLE ? `${v} ／100g` : ''}</td><td>${u}</td><td>${row.code===SAMPLE ? 'Ragic 匯入' : ''}</td></tr>`)}
+      </tbody></table>
+    </div>`},
+  ];
+  return html`<div>
+    <div className="toolbar">
+      <${Button} icon=${html`<${I.SearchOutlined}/>`} onClick=${onBack}>查詢<//>
+      <${Button} icon=${html`<${I.ReloadOutlined}/>`}>重新整理<//>
+      <${Button} icon=${html`<${I.PlusOutlined}/>`} onClick=${goNew}>新增<//>
+      <${Button} icon=${html`<${I.EditOutlined}/>`}>編輯<//>
+      <${Button} danger icon=${html`<${I.DeleteOutlined}/>`}>刪除<//>
+      <${Button} icon=${html`<${I.FileExcelOutlined}/>`}>導出<//>
+      <${Button} icon=${html`<${I.PrinterOutlined}/>`}>列印<//>
+      <${Button} icon=${html`<${I.HistoryOutlined}/>`}>異動紀錄<//>
+      <span className="sp"></span>
+      <span className="cur-title">${row.code} ${row.name}</span><${Tag}>瀏覽<//>
+    </div>
+    <div className="formwrap"><${Form} layout="vertical">
+      <${Row} gutter=${16}>
+        <${F} label="貨號" span=${2}>${di(row.code, {width:145})}<//>
+        <${F} label="簡稱" req>${di(d.short)}<//>
+        <${F} label="狀態" tip="取號後自動變成「正式」，不用手動改">${ds(row.status)}<//>
+      <//>
+      <${Row} gutter=${16}><${F} label="品名" req span=${2}>${di(row.name)}<//><//>
+      <${Divider} orientation="left">貨號組成<span className="div-sub">建檔後不能改</span><//>
+      <${Row} gutter=${16}>
+        <${F} label="類型（1碼）" req tip="這一頁固定是這個類型；要建別的類型請到該類型的頁面">${ds('1 原料')}<//>
+        <${F} label="產線（2碼）">${ds('1 食品')}<//>
+        <${F} label="型態（3～4碼）">${ds(formCode(row))}<//>
+        <${F} label="供應商（5～8碼）" span=${2} tip="供應商與所屬客戶擇一填寫">${dq(row.isCus ? '' : `${row.supCode} ${row.supShort}`)}<//>
+      <//>
+      <${Row} gutter=${16}>
+        <${F} label="所屬客戶／客供料（5～8碼）" span=${2} tip="掛所屬客戶＝客戶提供的料（客供料）。供應商與所屬客戶擇一填寫">${dq(row.isCus ? `${row.supCode} ${row.supShort}` : '')}<//>
+        <${F} label="流水號（9～13碼）" tip="系統配號，不能手填">${di(row.code.slice(8))}<//>
+      <//>
+      <${Divider} orientation="left">基本資料<//>
+      <${Row} gutter=${16}>
+        <${F} label="英文名稱" span=${2}>${di(d.en)}<//>
+        <${F} label="進口">${html`<${Switch} disabled/>`}<//>
+        <${F} label="基本單位" req>${ds('g 克')}<//>
+        <${F} label="替代料" span=${2}>${dq()}<//>
+        <${F} label="規格" span=${3}>${di()}<//>
+        <${F} label="備註" span=${3}>${dt()}<//>
+        <${F} label="備註二" span=${3}>${dt()}<//>
+      <//>
+      <${Tabs} items=${tabs}/>
+    <//></div>
+  </div>`;
+}
+
+/* ---------- 建議版：清單 ---------- */
+function NewList({rows, onOpen}){
+  const [kw, setKw] = useState('');
+  const [line, setLine] = useState();
+  const [form, setForm] = useState();
+  const [sup, setSup] = useState();
+  const k = kw.trim().toLowerCase();
+  const data = rows.slice().sort((a,b)=>b.code.slice(8).localeCompare(a.code.slice(8))).filter(r =>
+    (!k || (r.code+r.newName+r.vendorNo).toLowerCase().includes(k)) &&
+    (!line || r.line===line.slice(2)) && (!form || r.form===form.slice(3)) && (!sup || r.sup===sup));
+  const filtered = k || line || form || sup;
+  const cols = [
+    {title:th('貨號',1), dataIndex:'code', width:150, sorter:(a,b)=>a.code.localeCompare(b.code)},
+    {title:th('品名',4), dataIndex:'newName'},
+    {title:th('原廠料號',5), dataIndex:'vendorNo', width:140, render:v=>v||'—'},
+    {title:'產線', dataIndex:'line', width:80},
+    {title:th('型態',6), dataIndex:'form', width:90},
+    {title:'基本單位', dataIndex:'unit', width:90},
+    {title:'估價單價', dataIndex:'price', width:100, align:'right', render:price4, sorter:(a,b)=>a.price-b.price},
+    {title:'供應商', dataIndex:'sup', width:160},
+    {title:'營養', dataIndex:'nut', width:70, render:v=>v ? html`<${Tag} color="green">有<//>` : '—'},
+    {title:'狀態', dataIndex:'status', width:80, render:v=>html`<${Tag} color="green">${v}<//>`},
+  ];
+  return html`<div>
+    <div className="toolbar">
+      <${Input} allowClear prefix=${html`<${I.SearchOutlined} style=${{color:'rgba(0,0,0,.35)'}}/>`} placeholder="搜尋貨號、品名、原廠料號"
+        value=${kw} onChange=${e=>setKw(e.target.value)} style=${{width:300}}/>
+      <${Mk} n=${2}/>
+      <${Select} allowClear placeholder="產線" value=${line} onChange=${setLine} options=${LINES} style=${{width:120}}/>
+      <${Select} allowClear placeholder="型態" value=${form} onChange=${setForm} options=${FORMS} style=${{width:120}}/>
+      <${Select} allowClear showSearch optionFilterProp="label" placeholder="供應商" value=${sup} onChange=${setSup}
+        options=${Object.entries(SUPS).map(([c,[n]])=>({value:n, label:`${c} ${n}`}))} style=${{width:220}}/>
+      <span className="sp"></span>
+      <${Button} icon=${html`<${I.FileExcelOutlined}/>`}>導出<//>
+      <${Button} icon=${html`<${I.PrinterOutlined}/>`}>列印<//>
+      <${Button} type="primary" icon=${html`<${I.PlusOutlined}/>`} onClick=${goNew}>新增<//>
+      <${Mk} n=${3}/>
+    </div>
+    <${Table} size="middle" columns=${cols} dataSource=${data} pagination=${false} rowClassName="rowlink"
+      locale=${{emptyText:'查無符合的原料'}}
+      onRow=${r=>({onClick:()=>onOpen(r)})}/>
+    <div className="pagebar"><${Pagination} total=${filtered ? data.length : TOTAL + rows.length - RAW.length} pageSize=${50} showSizeChanger
+      showTotal=${t=>`共 ${t.toLocaleString()} 筆`}/><${Mk} n=${7}/></div>
+  </div>`;
+}
+
+/* ---------- 建議版：打開一筆 ---------- */
+function NutLabel({has, edit}){
+  const ni = props => html`<${InputNumber} size="small" min=${0} style=${{width:110}} ...${props}/>`;
+  return html`<div className="nl">
+    <div className="nl-title">營養標示<${Mk} n=${12}/></div>
+    <div className="nl-top"><span className="k">每一份量</span>${edit ? ni({}) : '—'} 公克</div>
+    <div className="nl-top"><span className="k">本包裝含</span>${edit ? ni({}) : '—'} 份</div>
+    <table className="nl-t">
+      <thead><tr><th></th><th>每份</th><th>每 100 公克</th></tr></thead>
+      <tbody>${NUT8.map(([n,u,,v])=>html`<tr key=${n}>
+        <td className=${SUBNUT.includes(n)?'sub':''}>${n}</td>
+        <td>${edit ? ni({disabled:true}) : '—'}<span className="u">${u}</span></td>
+        <td>${edit ? ni({defaultValue: has ? v : undefined}) : (has ? v : '—')}<span className="u">${u}</span></td>
+      </tr>`)}</tbody>
+    </table>
+  </div>`;
+}
+
+function NewDetail({row, onBack}){
+  const [edit, setEdit] = useState(false);
+  const has = row.code===SAMPLE;
+  const d = has ? DETAIL : (row.extra || {});
+  // 欄位：瀏覽顯示文字；編輯時變輸入框（lock＝建檔後不能改，編輯時也只顯示文字）
+  const v = (label, value, o={}) => html`<${Col} key=${label} span=${(o.span||1)*4}><div className="vf">
+    <div className="k">${label}</div>
+    ${edit && !o.lock
+      ? (o.ta ? html`<${Input.TextArea} defaultValue=${value||''} autoSize=${{minRows:2, maxRows:8}}/>` : html`<${Input} defaultValue=${value||''}/>`)
+      : html`<div className="v">${(value===undefined || value===null || value==='') ? '—' : value}</div>`}
+  </div><//>`;
+  const del = () => Modal.confirm({title:'刪除這筆原料？', content:`${row.code} ${row.newName}`, okText:'刪除', cancelText:'取消',
+    okButtonProps:{danger:true}, onOk:()=>{ message.success('已刪除'); onBack(); }});
+  const tabs = [
+    {key:'b', label:'基本資料與取號', children: html`<div>
+      <${Row} gutter=${16}>
+        ${v('品名', row.newName, {span:2})}${v('英文名稱', d.en, {span:2})}${v('簡稱', d.short)}${v('狀態', row.status, {lock:true})}
+        ${v('進口', '否')}${v('替代料', '', {span:2})}${v('備註', '', {span:3, ta:true})}
+      <//>
+      <${Divider} orientation="left">貨號組成<span className="div-sub">建檔後不能改</span><//>
+      <${Row} gutter=${16}>
+        ${v('類型', '1 原料', {lock:true})}${v('產線', '1 食品', {lock:true})}${v('型態', formCode(row), {lock:true})}
+        ${v(row.isCus ? '所屬客戶' : '供應商', `${row.supCode} ${row.sup}`, {span:2, lock:true})}${v('流水號', row.code.slice(8), {lock:true})}
+        ${v('基本單位', 'g 公克')}
+      <//>
+    </div>`},
+    {key:'p', label:'採購／價格', children: html`<${Row} gutter=${16}>
+      ${v('製造商', '', {span:2})}${v('原廠料號', row.vendorNo)}${v('品牌', '')}${v('產地', '')}${v('單價更新日', '', {lock:true})}
+      ${v('估價單價（元／g）', price4(row.price))}${v('最小採購量', '')}
+    <//>`},
+    {key:'k', label:'包裝／外觀', children: html`<${Row} gutter=${16}>
+      ${v('包裝規格', '', {span:2})}${v('樣貌分類', row.form, {lock:true})}${v('料性', '', {span:2})}
+    <//>`},
+    {key:'n', label:html`<span className="th">營養／標示<${Mk} n=${11}/></span>`, children: html`<div>
+      <${Row} gutter=${16}>
+        ${v('葷素', '')}${v('過敏原', d.allergen, {span:2})}${v('添加物', d.additive, {span:2})}${v('建議劑量', '')}
+        ${v('功能分類', '', {span:2})}
+      <//>
+      <${NutLabel} has=${has} edit=${edit}/>
+      <${Row} gutter=${16}>
+        ${v('其他功效說明', d.effect, {span:3, ta:true})}${v('成分展開', d.ingredients, {span:3, ta:true})}
+        ${v('定量成分', '', {span:3, ta:true})}${v('機能成分', d.functional, {span:3, ta:true})}
+      <//>
+    </div>`},
+    {key:'l', label:'法規／智財', children: html`<${Row} gutter=${16}>
+      ${v('法規', d.law, {span:6, ta:true})}${v('認證', '', {span:3, ta:true})}${v('專利', '', {span:3, ta:true})}
+      ${v('專利證書張數', '')}${v('商標授權', '')}${v('商標授權劑量要求', '', {span:2})}
+    <//>`},
+    {key:'s', label:'儲存／效期', children: html`<${Row} gutter=${16}>
+      ${v('存放方式', '', {span:2})}${v('保存期限', '')}
+    <//>`},
+  ];
+  return html`<div>
+    <div className="dhead">
+      <div className="dleft">
+        <div><span className="back" onClick=${onBack}><${I.ArrowLeftOutlined}/>原料清單</span><${Mk} n=${8}/></div>
+        <div className="dtitle"><span className="dcode">${row.code}</span><span>${row.newName}</span>
+          <${Tag} color="green">${row.status}<//>${edit && html`<${Tag} color="gold">編輯中<//>`}</div>
+      </div>
+      <div className="dbtns">
+        ${edit ? html`
+          <${Button} onClick=${()=>setEdit(false)}>取消<//>
+          <${Button} type="primary" icon=${html`<${I.SaveOutlined}/>`} onClick=${()=>{ setEdit(false); message.success('已存檔'); }}>存檔<//>`
+        : html`
+          <${Button} icon=${html`<${I.HistoryOutlined}/>`}>異動紀錄<//>
+          <${Button} icon=${html`<${I.PrinterOutlined}/>`}>列印<//>
+          <${Dropdown} trigger=${['click']} menu=${{items:[{key:'del', danger:true, icon:html`<${I.DeleteOutlined}/>`, label:'刪除'}], onClick:del}}>
+            <${Button} icon=${html`<${I.EllipsisOutlined}/>`}/>
+          <//>
+          <${Mk} n=${9}/>
+          <${Button} type="primary" icon=${html`<${I.EditOutlined}/>`} onClick=${()=>setEdit(true)}>編輯<//>
+          <${Mk} n=${10}/>`}
+      </div>
+    </div>
+    <div className="formwrap"><${Tabs} key=${edit?'e':'v'} items=${tabs}/></div>
+  </div>`;
+}
+
+/* ---------- 外框 ---------- */
+const menuItems = [
+  {key:'dash', icon:html`<${I.DashboardOutlined}/>`, label:'儀表板'},
+  {key:'sys', icon:html`<${I.SettingOutlined}/>`, label:'系統設定', children:[{key:'plant',label:'工廠別'},{key:'codes',label:'代碼表'}]},
+  {key:'base', icon:html`<${I.DatabaseOutlined}/>`, label:'基本檔', children:[
+    {key:'items', label:'貨號', children:['原料','物料','包材','半成品','成品','混料','其他','全部貨號'].map((t,i)=>({key:i?'it'+i:'raw',label:t}))},
+    {key:'itemset', label:'貨號設定', children:[{key:'cat',label:'貨號分類'},{key:'form',label:'型態分類'},{key:'unit',label:'計量單位'}]},
+    {key:'rd', label:'研發參數', children:[{key:'nu',label:'營養素'},{key:'dv',label:'每日參考值'},{key:'dose',label:'劑型'},{key:'dspec',label:'劑型規格'},{key:'func',label:'功能對照表'}]},
+    {key:'wh', label:'倉庫'},
+    {key:'phr', label:'欄位片語（未完成）'},
+    {key:'fin', label:'財務設定', children:[{key:'cus',label:'客戶'},{key:'sup',label:'供應商'},{key:'term',label:'收付款條件'},{key:'cur',label:'幣別'},{key:'fx',label:'匯率'},{key:'bank',label:'匯款銀行'}]},
+  ]},
+  {key:'plm', icon:html`<${I.ExperimentOutlined}/>`, label:'PLM 研發', children:[
+    {key:'qr',label:'客戶需求單'},{key:'ma',label:'配方估價單'},{key:'me',label:'報價單'},{key:'mb',label:'打樣單'},{key:'mr',label:'研發調料申請'},{key:'nc',label:'營養素計算單'}]},
+];
+
+const LogoMark = html`<svg width="26" height="22" viewBox="0 0 26 22" aria-hidden="true">
+  <rect x="0" y="6" width="10" height="10" fill="#EBCA23"/><rect x="8" y="0" width="8" height="8" fill="#fff"/>
+  <rect x="12" y="10" width="8" height="8" fill="#EBCA23"/><rect x="18" y="4" width="6" height="6" fill="#fff"/></svg>`;
+
+function App(){
+  const [mode, setModeRaw] = useState(INIT_MODE);
+  const [showMk, setShowMk] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [rows] = useState(() => NEW_ROW ? [NEW_ROW, ...RAW] : RAW);   // 新增頁存檔回來的那筆排最上面
+  const [row, setRow] = useState(NEW_ROW);           // null＝清單；有值＝打開那一筆
+  const [queried, setQueried] = useState(!!NEW_ROW); // 現況：清單按過「查詢」沒
+  const setMode = m => { setModeRaw(m); history.replaceState(null, '', pageUrl('原料清單_示意.html', m)); };
+  curMode = mode;
+  const theme = {
+    token:{ colorPrimary:'#EBCA23', colorText:'#3D3A39', colorBorder:'#EAE3D5', borderRadius:8, colorLink:'#B8961A' },
+    components:{
+      Button:{ primaryColor:'#3D3A39', fontWeight:500, primaryShadow:'none' },
+      Menu:{ darkItemBg:'#3D3A39', darkSubMenuItemBg:'#2A2726', darkItemSelectedBg:'rgba(235,202,35,.18)',
+        darkItemSelectedColor:'#EBCA23', darkItemColor:'rgba(255,255,255,.72)', darkItemHoverColor:'#fff', itemMarginInline:4, itemBorderRadius:10 },
+      Tabs:{ itemSelectedColor:'#EBCA23', inkBarColor:'#EBCA23', itemHoverColor:'#C9A91B' },
+      Table:{ headerBg:'#FCF3D7' },
+      Layout:{ siderBg:'#3D3A39', bodyBg:'#F7F5F1' },
+    }
+  };
+  const back = () => { setQueried(true); setRow(null); window.scrollTo({top:0}); };
+  const open = r => { setRow(r); window.scrollTo({top:0}); };
+  const body = mode==='現況'
+    ? (row ? html`<${CurrentDetail} key=${'cd'+row.code} row=${row} onBack=${back}/>`
+           : html`<${CurrentList} key="cl" rows=${rows} queried=${queried} setQueried=${setQueried} onOpen=${open}/>`)
+    : (row ? html`<${NewDetail} key=${'nd'+row.code} row=${row} onBack=${back}/>`
+           : html`<${NewList} key="nl" rows=${rows} onOpen=${open}/>`);
+  return html`<${ConfigProvider} theme=${theme} button=${{autoInsertSpace:false}}>
+  <${Layout} style=${{minHeight:'100vh'}} className=${showMk && mode==='建議版' ? '' : 'hide-mk'}>
+    <${Layout.Sider} width=${200} style=${{background:'#3D3A39'}}>
+      <div className="logo"><div className="logo-in">
+        <div className="logo-mark">${LogoMark}<b>BKE</b></div>
+        <div className="logo-name">百達醫系統</div>
+      </div></div>
+      <${Menu} theme="dark" mode="inline" items=${menuItems} defaultOpenKeys=${['base','items']} selectedKeys=${['raw']}
+        onClick=${({key})=>{ if(key==='raw'){ setRow(null); setQueried(false); } }} style=${{background:'#3D3A39', borderInlineEnd:0}}/>
+    <//>
+    <${Layout}>
+      <div className="hdr">
+        <${I.MenuFoldOutlined} style=${{fontSize:16}}/>
+        <h1>原料</h1>
+        <${I.BellOutlined} style=${{fontSize:16}}/>
+        <span className="user"><${Avatar} size=${24} icon=${html`<${I.UserOutlined}/>`}/>demo01（業務、業助）</span>
+      </div>
+      <div className="content">${body}</div>
+    <//>
+  <//>
+  <div className="panel">
+    <div className="panel-h">
+      <${Segmented} size="small" value=${mode} onChange=${setMode} options=${['現況','建議版']}/>
+      <span className="sp"></span>
+      ${mode==='建議版' && html`<${Checkbox} checked=${showMk} onChange=${e=>setShowMk(e.target.checked)}>標註<//>`}
+      <${Button} size="small" type="text" icon=${html`<${panelOpen?I.DownOutlined:I.UpOutlined}/>`} onClick=${()=>setPanelOpen(!panelOpen)}/>
+    </div>
+    ${panelOpen && mode==='建議版' && html`<div className="panel-b"><ol>
+      ${CHANGES.map((c,i)=>html`<li key=${i}><span className="mk">${i+1}</span><span>${c}</span></li>`)}
+    </ol></div>`}
+    ${panelOpen && mode==='現況' && html`<div className="panel-b">目前系統畫面（2026-11-25）。清單單擊選取、雙擊打開；打開後按「查詢」回清單。</div>`}
+  </div>
+  <//>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
