@@ -119,7 +119,7 @@ const NEXT_SERIAL = '00527';
 /* ---------- 兩頁連動：網址帶 v=cur（現況）／new（建議版） ---------- */
 const THIS_PAGE = '包材新增_示意.html';
 const LIST_PAGE = '包材清單_示意.html';
-const LIST_READY = false;   // 包材清單示意頁做好後改 true
+const LIST_READY = true;
 const INIT_MODE = new URLSearchParams(location.search).get('v')==='cur' ? '現況' : '建議版';
 const pageUrl = (page, mode, extra='') => `${page}?v=${mode==='現況'?'cur':'new'}${extra}`;
 let curMode = INIT_MODE;
