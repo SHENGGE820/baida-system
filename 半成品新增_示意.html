@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>半成品新增示意</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/antd@5.21.6/dist/antd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ant-design/icons@5.5.1/dist/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<style>
+  :root{
+    --gold:#EBCA23; --ink:#3D3A39; --sider:#3D3A39; --sider-sub:#2A2726;
+    --page:#F7F5F1; --field:#FAF8F4; --line:#EAE3D5; --split:rgba(155,109,17,.13);
+  }
+  html,body{margin:0;background:var(--page);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";}
+  #root{min-height:100vh}
+  /* 側欄 */
+  .logo{padding:18px 8px 16px;border-bottom:2px solid var(--gold);}
+  .logo-in{display:inline-flex;flex-direction:column;align-items:center;width:124px}
+  .logo-mark{display:flex;align-items:center;gap:4px;height:26px}
+  .logo-mark b{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:29px;color:#fff;letter-spacing:.5px;line-height:26px}
+  .logo-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:1px;margin-top:6px}
+  .ant-layout-sider .ant-menu-dark .ant-menu-item,.ant-layout-sider .ant-menu-dark .ant-menu-submenu-title{border-radius:10px}
+  /* 頁首 */
+  .hdr{height:64px;background:#fff;display:flex;align-items:center;padding:0 24px;gap:16px}
+  .hdr h1{font-size:20px;font-weight:600;margin:0;flex:1}
+  .hdr .user{display:flex;align-items:center;gap:8px;font-size:14px}
+  /* 內容 */
+  .content{margin:16px;background:#fff;border-radius:8px;padding:16px;min-height:calc(100vh - 128px)}
+  .toolbar{display:flex;gap:8px;align-items:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #F0EBE0}
+  .formwrap .ant-divider-horizontal.ant-divider-with-text{margin-top:8px}
+  .formwrap .ant-alert{margin-bottom:8px!important}
+  .toolbar .sp{flex:1}
+  .formwrap{max-width:1320px}
+  .ant-input:not(.ant-input-disabled),.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled),
+  .ant-select:not(.ant-select-disabled) .ant-select-selector,.ant-input-number:not(.ant-input-number-disabled),
+  textarea.ant-input:not(.ant-input-disabled){background:var(--field)!important}
+  .ant-divider-horizontal.ant-divider-with-text::before,.ant-divider-horizontal.ant-divider-with-text::after{border-block-start-color:var(--split)!important}
+  .ant-divider-inner-text{font-size:16px;font-weight:500}
+  .div-sub{font-size:12px;font-weight:400;color:rgba(0,0,0,.45);margin-left:8px}
+  .note{font-size:14px;color:rgba(0,0,0,.45);margin:0 0 24px}
+  /* 貨號預覽 */
+  .code-preview{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+  .seg{display:flex;flex-direction:column;align-items:center;min-width:64px}
+  .seg .d{font-family:ui-monospace,Consolas,monospace;font-size:20px;font-weight:600;letter-spacing:2px;
+    padding:2px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);min-width:28px;text-align:center;height:32px;line-height:28px;box-sizing:border-box}
+  .seg .d.empty{color:rgba(0,0,0,.25)}
+  .seg .d.fixed{background:rgba(0,0,0,.04)}
+  .seg .c{font-size:12px;color:rgba(0,0,0,.45);margin-top:4px;white-space:nowrap;text-align:center;line-height:1.4}
+  .sum{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--field);margin-bottom:24px}
+  .sum .k{font-size:12px;color:rgba(0,0,0,.45)}
+  .sum .v{font-size:14px}
+  .sum .code{font-family:ui-monospace,Consolas,monospace;font-size:18px;font-weight:600;letter-spacing:1px}
+  /* 修改標註 */
+  .mk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;
+    background:#E5484D;color:#fff;font-size:11px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help;flex:none}
+  .hide-mk .mk{display:none}
+  /* 切換面板 */
+  .panel{position:fixed;right:260px;top:10px;width:340px;background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:1000;font-size:13px}
+  .panel-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #F0EBE0}
+  .panel-h .sp{flex:1}
+  .panel-b{padding:8px 12px 12px;max-height:46vh;overflow:auto}
+  .panel ol{margin:0;padding:0;list-style:none}
+  .panel li{display:flex;gap:8px;padding:6px 0;line-height:1.55}
+  .panel li .mk{margin:2px 0 0}
+  .steps-wrap{display:flex;align-items:flex-start;gap:4px;padding:4px 0 20px;margin-bottom:20px;border-bottom:1px solid #F0EBE0}
+  .steps-wrap .ant-steps{flex:1}
+  .stepnav{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:#fff;border-top:1px solid #F0EBE0;padding:12px 0;margin-top:8px}
+  .stepnav-mid{font-size:13px;color:rgba(0,0,0,.45)}
+  .modal-filter{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px;background:var(--field);border:1px solid #F0EBE0;border-radius:8px}
+  .modal-hint{font-size:12px;color:rgba(0,0,0,.45);margin:8px 0}
+  /* 建議版頂端（同原料清單示意頁） */
+  .dhead{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #F0EBE0}
+  .dleft{flex:1;min-width:280px}
+  .back{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:rgba(0,0,0,.55);cursor:pointer;margin-bottom:8px}
+  .back:hover{color:var(--ink)}
+  .dtitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:18px;font-weight:600}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const html = htm.bind(React.createElement);
+const { useState } = React;
+const {
+  ConfigProvider, Layout, Menu, Button, Input, Select, Switch, Form, Row, Col, Divider, Alert, Tabs, Tag,
+  Modal, Table, InputNumber, Space, Avatar, Segmented, Checkbox, Tooltip, Steps, message
+} = antd;
+const I = icons;
+
+/* ---------- 假資料 ---------- */
+const SUPPLIERS = [
+  ['9101','宏昌膠囊工業股份有限公司','宏昌膠囊','24518832','膠囊廠'],
+  ['9301','青松代工有限公司','青松代工','53120476','代工廠'],
+].map(([code,name,short,tax,kind])=>({key:code,code,name,short,tax,kind}));
+const CUSTOMERS = [
+  ['8001','美好生活國際有限公司','美好生活','24681357','品牌商'],
+  ['8002','安心健康事業股份有限公司','安心健康','13572468','品牌商'],
+  ['8010','青田生醫有限公司','青田生醫','56473829','直銷'],
+  ['8023','晴光藥品股份有限公司','晴光','98761234','藥局通路'],
+  ['8031','暖陽保健食品有限公司','暖陽','11223344','品牌商'],
+].map(([code,name,short,tax,kind])=>({key:code,code,name,short,tax,kind}));
+const opt = arr => arr.map(x=>({value:x,label:x}));
+const LINES = opt(['1 食品','2 化粧品','3 清潔用品']);
+const FORMS = opt(['01 膠囊','02 軟膠囊','03 錠劑','04 粉劑','05 排裝','06 液劑','07 油劑','08 乳劑','09 膠劑',
+  '10 條狀','11 盒裝','12 滴丸','13 大袋裝','14 袋裝-折角鋁袋','15 杯裝','16 瓶裝','17 軟糖','18 其他']);
+const UNITS = opt(['cap 顆','strip 排','pkg 包','bag 袋','btl 瓶','tab 錠','bar 條','kg 公斤','box 盒','pcs 個']);
+const NEXT_SERIAL = '00319';
+
+/* ---------- 兩頁連動：網址帶 v=cur（現況）／new（建議版） ---------- */
+const THIS_PAGE = '半成品新增_示意.html';
+const LIST_PAGE = '半成品清單_示意.html';
+const LIST_READY = true;
+const INIT_MODE = new URLSearchParams(location.search).get('v')==='cur' ? '現況' : '建議版';
+const pageUrl = (page, mode, extra='') => `${page}?v=${mode==='現況'?'cur':'new'}${extra}`;
+let curMode = INIT_MODE;
+const goList = (extra='') => {
+  if (!LIST_READY) { message.info('半成品清單示意頁還沒做'); return; }
+  window.location.href = pageUrl(LIST_PAGE, curMode, extra);
+};
+
+/* ---------- 修改說明（第 1 步同原料；後面只改錄音提到的） ---------- */
+const CHANGES = [
+  '取號要填的欄位集中在第 1 步，照填寫順序排：品名 → 英文名稱 → 簡稱 → 產線 → 型態 → 基本單位 → 供應商／所屬客戶 → 取號存檔。（7 種貨號第 1 步都一樣，同原料）',
+  '基本單位從「基本資料」移到取號區，標必填（取號時必填）。',
+  '供應商與所屬客戶改成先選來源、再挑一個，必填；欄位可直接打字搜尋代碼或名稱，不用開視窗。半成品預設「客戶」：現有半成品幾乎都掛所屬客戶。原本是所屬客戶排在供應商前面（同包材），跟原料相反。',
+  '🔍 挑選視窗打開就列出全部，打字即時篩選，不用先按「查詢」。',
+  '類型、流水號不再各佔一個欄位，改在「貨號預覽」顯示；每選一項，預覽即時拼出貨號。',
+  '「取號存檔」放在右下角，跟每一步的「下一步」同一個位置。',
+  '頁籤改成分步驟：上方步驟條顯示目前在第幾步、每步已填幾項，可直接點步驟跳過去；底下「上一步／下一步」。取號前，第 2 步鎖住。',
+  '取號後，最上方固定顯示一行摘要（貨號、品名、狀態），換步驟也看得到。',
+  '英文名稱移到品名旁邊，取號前就能填。',
+  '規格：半成品不顯示（現有半成品幾乎都沒填）。',
+  '備註併到第 1 步，放在名稱下面，取號前就能填，按「取號存檔」一起存。',
+  '最上方改成「← 半成品清單」和「新增半成品」，跟原料同一種排法；原本那排按鈕新增時大多是灰的。「取消」回清單，完成存檔後回清單並打開剛建的那筆。',
+];
+const Mk = ({n}) => html`<${Tooltip} title=${CHANGES[n-1]}><span className="mk">${n}</span></${Tooltip}>`;
+
+/* ---------- 版面元件 ---------- */
+const Lbl = (text, mk) => mk ? html`<span style=${{display:'inline-flex',alignItems:'center'}}>${text}${[].concat(mk).map(n=>html`<${Mk} key=${n} n=${n}/>`)}</span>` : text;
+function F({label, req, tip, span=1, mk, status, help, name, valuePropName, children}){
+  return html`<${Col} span=${span*4}>
+    <${Form.Item} name=${name} valuePropName=${valuePropName} label=${Lbl(label, mk)} required=${req} tooltip=${tip} validateStatus=${status} help=${help}>${children}</${Form.Item}>
+  </${Col}>`;
+}
+const ta = (rows, dis) => html`<${Input.TextArea} rows=${rows} disabled=${dis}/>`;
+const inp = dis => html`<${Input} disabled=${dis}/>`;
+const sel = (dis, ph, options=[]) => html`<${Select} disabled=${dis} placeholder=${ph} options=${options} style=${{width:'100%'}}/>`;
+const num = dis => html`<${InputNumber} disabled=${dis} style=${{width:'100%'}}/>`;
+
+/* ---------- 現況版：下方頁籤 ---------- */
+function LowerTabs({dis}){
+  const items = [
+    {key:'buy', label:'採購／價格', children: html`<${Row} gutter=${16}>
+      <${F} label="估價單價">${num(dis)}<//>
+      <${F} label="單價對應單位">${sel(dis,'',UNITS)}<//>
+      <${F} label="單價更新日">${inp(dis)}<//>
+    <//>`},
+  ];
+  return html`<${Tabs} items=${items}/>`;
+}
+
+/* ---------- 挑選視窗 ---------- */
+function PickModal({open, kind, onClose, onPick, autoList}){
+  const isSup = kind==='sup', isItem = kind==='item';
+  const data = isItem ? ITEMS : isSup ? SUPPLIERS : CUSTOMERS;
+  const [kw, setKw] = useState('');
+  const [cat, setCat] = useState('全部');
+  const [searched, setSearched] = useState(false);
+  const cats = ['全部', ...new Set(data.map(d=>d.kind).filter(Boolean))];
+  const filtered = data.filter(d => (cat==='全部'||d.kind===cat) &&
+      (!kw || (d.code+d.name+d.short+(d.tax||'')).includes(kw)));
+  const rows = (autoList || searched) ? filtered : [];
+  const pickCol = {title:'', key:'act', width:70, render:(_,r)=>html`<${Button} type="link" size="small" onClick=${()=>onPick(r)}>選取<//>`};
+  const cols = isItem ? [
+    {title:'貨號', dataIndex:'code', width:150},
+    {title:'品名', dataIndex:'name'},
+    {title:'簡稱', dataIndex:'short', width:180},
+    pickCol,
+  ] : [
+    {title:'代碼', dataIndex:'code', width:100},
+    {title:'名稱', dataIndex:'name'},
+    {title:'簡稱', dataIndex:'short', width:180},
+    {title:'統一編號', dataIndex:'tax', width:100},
+    pickCol,
+  ];
+  const close = () => { setKw(''); setCat('全部'); setSearched(false); onClose(); };
+  return html`<${Modal} open=${open} title=${isItem?'挑選貨號':isSup?'挑選廠商':'挑選客戶'} width=${880} footer=${null} onCancel=${close} destroyOnClose>
+    <div className="modal-filter">
+      <span>關鍵字: <${Input} style=${{width:180}} placeholder=${isItem?'貨號／品名':isSup?'代碼／名稱':'代碼／名稱／統編'} value=${kw} onChange=${e=>setKw(e.target.value)} onPressEnter=${()=>setSearched(true)}/></span>
+      ${!isItem && html`<span>${isSup?'廠商類別':'客戶型態'}: <${Select} style=${{width:140}} value=${cat} onChange=${setCat} options=${opt(cats)}/></span>`}
+      ${!autoList && html`<${Button} type="primary" icon=${html`<${I.SearchOutlined}/>`} onClick=${()=>setSearched(true)}>查詢<//>`}
+    </div>
+    <div className="modal-hint">${isItem ? '不能選自己' : '只列出代碼能用在貨號上的（4 碼數字）'}</div>
+    <${Table} size="small" columns=${cols} dataSource=${rows} pagination=${false}
+      locale=${{emptyText: autoList ? '查無符合的資料' : '輸入條件後按「查詢」（不輸入關鍵字＝全部）'}}
+      onRow=${r=>({onDoubleClick:()=>onPick(r)})}/>
+    <div className="modal-hint">雙擊一列或按「選取」帶入</div>
+  <//>`;
+}
+
+/* ---------- 現況版 ---------- */
+function Current(){
+  const [modal, setModal] = useState(null);
+  const [sup, setSup] = useState(null);
+  const [cus, setCus] = useState(null);
+  const [taken, setTaken] = useState(false);
+  const dis = !taken;
+  const pickBox = (val, kind) => html`<${Space.Compact} style=${{width:'100%'}}>
+    <${Input} readOnly placeholder="按右邊按鈕挑選" value=${val?`${val.code} ${val.name}`:''}/>
+    <${Button} icon=${html`<${I.SearchOutlined}/>`} onClick=${()=>setModal(kind)}/>
+  <//>`;
+  return html`<div className="formwrap"><${Form} layout="vertical">
+    <${Row} gutter=${16}>
+      <${F} label="貨號" span=${2}>
+        <${Space}>
+          <${Input} disabled value=${taken?`41018001${NEXT_SERIAL}`:'4????????????'} style=${{width:145}}/>
+          <${Button} type="primary" icon=${html`<${I.NumberOutlined}/>`} onClick=${()=>{setTaken(true);message.success('取號完成');}} disabled=${taken}>取號存檔<//>
+        <//>
+      <//>
+      <${F} label="簡稱" req>${html`<${Input}/>`}<//>
+      <${F} label="狀態" tip="取號後自動變成「正式」，不用手動改">${html`<${Select} disabled value=${taken?'正式':'待建'} style=${{width:'100%'}}/>`}<//>
+    <//>
+    <${Row} gutter=${16}>
+      <${F} label="品名" req span=${2}>${html`<${Input}/>`}<//>
+    <//>
+    <${Divider} orientation="left">貨號組成<span className="div-sub">建檔後不能改</span><//>
+    <${Row} gutter=${16}>
+      <${F} label="類型（1碼）" req tip="這一頁固定是這個類型；要建別的類型請到該類型的頁面">${html`<${Select} disabled value="4 半成品" style=${{width:'100%'}}/>`}<//>
+      <${F} label="產線（2碼）" req>${sel(taken,'',LINES)}<//>
+      <${F} label="型態（3～4碼）" req>${sel(taken,'',FORMS)}<//>
+      <${F} label="所屬客戶／客供料（5～8碼）" span=${2} tip="掛所屬客戶＝客戶提供的料（客供料）。供應商與所屬客戶擇一填寫">${pickBox(cus,'cus')}<//>
+    <//>
+    <${Row} gutter=${16}>
+      <${F} label="供應商（5～8碼）" span=${2} tip="供應商與所屬客戶擇一填寫">${pickBox(sup,'sup')}<//>
+      <${F} label="流水號（9～13碼）" tip="系統配號，不能手填（業主 2026-10-01）">${html`<${Input} disabled placeholder="取號時配號" value=${taken?NEXT_SERIAL:''}/>`}<//>
+    <//>
+    <${Row} gutter=${16}><${Col} span=${24}>
+      <${Alert} type="warning" showIcon style=${{marginBottom:16, background:'#FFFFF0', borderColor:'#FFF9A1', borderRadius:10}}
+        message="先填品名、選好貨號組成和基本單位，按「取號存檔」；取號後才能填其他欄位"/>
+    <//><//>
+    <${Divider} orientation="left">基本資料<//>
+    <${Row} gutter=${16}>
+      <${F} label="英文名稱" span=${2}>${inp(dis)}<//>
+      <${F} label="基本單位" tip="待建可以空、正式必填；取號後就是正式，取號時要填">${sel(false,'',UNITS)}<//>
+      <${F} label="規格" span=${3}>${inp(dis)}<//>
+      <${F} label="備註" span=${3}>${ta(2,dis)}<//>
+    <//>
+    <${LowerTabs} dis=${dis}/>
+  <//>
+  <${PickModal} open=${!!modal} kind=${modal||'cus'} autoList=${false} onClose=${()=>setModal(null)}
+    onPick=${r=>{ modal==='sup'?setSup(r):setCus(r); setModal(null); }}/>
+  </div>`;
+}
+
+/* ---------- 建議版 ---------- */
+const ITEMS = [];   // 半成品沒有替代料，挑選貨號視窗用不到
+
+const BASIC_FIELDS = [
+  {name:'remark', label:'備註', type:'ta', rows:1, span:4, mk:[10,11]},
+];
+
+const DIMS = [];
+const STEP_FIELDS = [
+  {title:'基本資料與取號'},
+  {title:'採購／價格', fields:[
+    {name:'price', label:'估價單價', type:'num'},
+    {name:'priceUnit', label:'單價對應單位', type:'sel', options:UNITS},
+    {name:'priceDate', label:'單價更新日', type:'inp'},
+  ]},
+];
+const isFilled = v => !(v===undefined || v===null || v==='' || v===false || (Array.isArray(v) && !v.length));
+const fieldFilled = (f, vals) => f.type==='dims' ? DIMS.some(([k])=>isFilled(vals[k])) : isFilled(vals[f.name]);
+
+function Proposed(){
+  const [v, setV] = useState({name:'', en:'', short:'', line:undefined, form:undefined, unit:undefined, src:'cus', party:undefined});
+  const [err, setErr] = useState({});
+  const [modal, setModal] = useState(null);
+  const [taken, setTaken] = useState(false);
+  const [step, setStep] = useState(0);
+  const [visited, setVisited] = useState([0]);
+  const [done, setDone] = useState(false);
+  const [vals, setVals] = useState({});
+  const [form] = Form.useForm();
+  const set = (k, val) => { setV(o=>({...o,[k]:val})); setErr(e=>({...e,[k]:false})); };
+  const list = v.src==='sup' ? SUPPLIERS : CUSTOMERS;
+  const party = list.find(x=>x.code===v.party);
+  const partyOpts = list.map(x=>({value:x.code, label:`${x.code} ${x.name}`}));
+  const seg = (d, cap, pos, state) => html`<div className="seg"><span className=${'d '+state}>${d}</span><span className="c">${cap}<br/>${pos}</span></div>`;
+  const e = k => err[k] ? {status:'error', help:'必填'} : {};
+  const fullCode = () => `4${v.line[0]}${v.form.slice(0,2)}${v.party}${NEXT_SERIAL}`;
+  const go = i => { setStep(i); setVisited(a=>a.includes(i)?a:[...a,i]); window.scrollTo({top:0, behavior:'smooth'}); };
+
+  const take = () => {
+    const need = ['name','short','line','form','unit','party'];
+    const miss = Object.fromEntries(need.filter(k=>!v[k]).map(k=>[k,true]));
+    setErr(miss);
+    if (Object.keys(miss).length) { message.error('還有必填欄位沒填'); return; }
+    setTaken(true);
+    message.success(`取號完成：${fullCode()}`);
+    go(1);
+  };
+
+  /* 替代料：品名相近的排前面 */
+  const kw = v.name.trim().slice(0,2);
+  const toOpt = x => ({value:x.code, label:`${x.code} ${x.name}`});
+  const similar = kw ? ITEMS.filter(x=>x.name.includes(kw)) : [];
+  const itemOpts = similar.length
+    ? [{label:'品名相近', options:similar.map(toOpt)}, {label:'其他貨號', options:ITEMS.filter(x=>!similar.includes(x)).map(toOpt)}]
+    : ITEMS.map(toOpt);
+
+  /* 步驟條 */
+  const stepItems = STEP_FIELDS.map((s, i) => {
+    if (i===0) return { title:s.title, description: taken ? '已取號' : '必填', disabled:false,
+      status: step===0 ? 'process' : (taken ? 'finish' : 'wait') };
+    const total = s.fields.length, n = s.fields.filter(f=>fieldFilled(f, vals)).length;
+    return { title: s.title,
+      description: taken ? `已填 ${n}/${total}` : '取號後填',
+      disabled: !taken,
+      status: step===i ? 'process' : ((done || visited.includes(i)) && taken ? 'finish' : 'wait') };
+  });
+
+  /* 依欄位定義畫欄位 */
+  const field = f => {
+    let ctl;
+    const w = {width:'100%'};
+    if (f.type==='inp') ctl = html`<${Input}/>`;
+    else if (f.type==='num') ctl = html`<${InputNumber} style=${w}/>`;
+    else if (f.type==='sel') ctl = html`<${Select} allowClear options=${f.options||[]} style=${w}/>`;
+    else if (f.type==='ta') ctl = html`<${Input.TextArea} rows=${f.rows}/>`;
+    else if (f.type==='item') ctl = html`<${Select} showSearch allowClear placeholder="打字搜尋貨號或品名" optionFilterProp="label"
+        options=${itemOpts} style=${w}/>`;
+    else if (f.type==='dims') return html`<${F} key=${f.name} label=${f.label} span=${f.span||1} mk=${f.mk}>
+        <${Space.Compact} style=${w}>
+          ${DIMS.map(([k,ph])=>html`<${Form.Item} key=${k} name=${k} noStyle><${InputNumber} min=${0} placeholder=${ph} style=${{width:'33.4%'}}/><//>`)}
+        <//><//>`;
+    const item = html`<${F} key=${f.name} name=${f.name} label=${f.label} span=${f.span||1} mk=${f.mk}>${ctl}<//>`;
+    if (f.type!=='item') return item;
+    // 替代料：可打字搜尋，旁邊留 🔍
+    return html`<${Col} key=${f.name} span=${(f.span||1)*4}>
+      <${Form.Item} label=${Lbl(f.label, f.mk)}>
+        <${Space.Compact} style=${{width:'100%'}}>
+          <${Form.Item} name=${f.name} noStyle>${ctl}<//>
+          <${Button} icon=${html`<${I.SearchOutlined}/>`} onClick=${()=>setModal('item')}/>
+        <//>
+      <//>
+    <//>`;
+  };
+
+  /* 第 1 步：取號 */
+  const lock = taken;
+  const step1 = html`
+    <${Row} gutter=${16}>
+      <${F} label="品名" req span=${2} mk=${1} ...${e('name')}>${html`<${Input} value=${v.name} onChange=${x=>set('name',x.target.value)}/>`}<//>
+      <${F} label="英文名稱" span=${2} mk=${9}>${html`<${Input} value=${v.en} onChange=${x=>set('en',x.target.value)}/>`}<//>
+      <${F} label="簡稱" req ...${e('short')}>${html`<${Input} value=${v.short} onChange=${x=>set('short',x.target.value)}/>`}<//>
+      <${F} label="狀態" tip="取號後自動變成「正式」，不用手動改">${html`<${Select} disabled value=${taken?'正式':'待建'} style=${{width:'100%'}}/>`}<//>
+    <//>
+    <${Row} gutter=${16}>${BASIC_FIELDS.map(field)}<//>
+    <${Divider} orientation="left">貨號組成<span className="div-sub">建檔後不能改</span><//>
+    <${Row} gutter=${16}>
+      <${F} label="產線" req ...${e('line')}>${html`<${Select} disabled=${lock} value=${v.line} onChange=${x=>set('line',x)} options=${LINES} style=${{width:'100%'}}/>`}<//>
+      <${F} label="型態" req ...${e('form')}>${html`<${Select} disabled=${lock} showSearch value=${v.form} onChange=${x=>set('form',x)} options=${FORMS} style=${{width:'100%'}}/>`}<//>
+      <${F} label="基本單位" req mk=${2} tip="取號後就是正式，正式必填" ...${e('unit')}>${html`<${Select} showSearch value=${v.unit} onChange=${x=>set('unit',x)} options=${UNITS} style=${{width:'100%'}}/>`}<//>
+      <${F} label="供應商／所屬客戶（擇一）" req span=${3} mk=${3} tip="掛所屬客戶＝客戶提供的料（客供料）" ...${e('party')}>
+        <${Space.Compact} style=${{width:'100%'}}>
+          <${Select} disabled=${lock} value=${v.src} style=${{width:110}} onChange=${x=>{ setV(o=>({...o,src:x,party:undefined})); }}
+            options=${[{value:'sup',label:'供應商'},{value:'cus',label:'客戶'}]}/>
+          <${Select} disabled=${lock} showSearch allowClear placeholder=${v.src==='sup'?'打字搜尋供應商代碼或名稱':'打字搜尋客戶代碼、名稱或統編'}
+            value=${v.party} onChange=${x=>set('party',x)} options=${partyOpts} optionFilterProp="label" style=${{flex:1}}/>
+          <${Button} disabled=${lock} icon=${html`<${I.SearchOutlined}/>`} onClick=${()=>setModal(v.src)}/>
+        <//>
+      <//>
+    <//>
+    <div style=${{marginBottom:8, display:'flex', alignItems:'center'}}>貨號預覽<${Mk} n=${5}/></div>
+    <div className="code-preview" style=${{marginBottom:24}}>
+      ${seg('4','類型（半成品）','第 1 碼','fixed')}
+      ${seg(v.line?v.line[0]:'?','產線','第 2 碼', v.line?'':'empty')}
+      ${seg(v.form?v.form.slice(0,2):'??','型態','第 3～4 碼', v.form?'':'empty')}
+      ${seg(v.party||'????', v.src==='sup'?'供應商':'客戶','第 5～8 碼', v.party?'':'empty')}
+      ${seg(taken?NEXT_SERIAL:'?????','流水號（取號時配）','第 9～13 碼', taken?'':'empty fixed')}
+    </div>`;
+
+  const summary = taken && html`<div className="sum">
+      <div><div className="k">貨號</div><div className="code">${fullCode()}</div></div>
+      <div><div className="k">品名</div><div className="v">${v.name}</div></div>
+      <div><div className="k">簡稱</div><div className="v">${v.short}</div></div>
+      <div><div className="k">貨號組成</div><div className="v">4 半成品／${v.line}／${v.form}／${v.src==='sup'?'供應商':'客戶'} ${party.code} ${party.short}</div></div>
+      <div><div className="k">基本單位</div><div className="v">${v.unit}</div></div>
+      <div><div className="k">狀態</div><${Tag} color="green" style=${{marginTop:2}}>正式<//></div>
+      <${Mk} n=${8}/>
+    </div>`;
+
+  const last = STEP_FIELDS.length - 1;
+  // 完成存檔：回半成品清單並打開剛建的那筆
+  const finish = () => {
+    setDone(true);
+    const q = new URLSearchParams({new: fullCode(), name: v.name, short: v.short, en: v.en || ''});
+    message.success('已存檔', 0.6, () => goList('&' + q.toString()));
+  };
+  const nav = html`<div className="stepnav">
+    <${Button} disabled=${step===0} onClick=${()=>go(step-1)} icon=${html`<${I.LeftOutlined}/>`}>上一步<//>
+    <span className="stepnav-mid">第 ${step+1} / ${STEP_FIELDS.length} 步・${STEP_FIELDS[step].title}</span>
+    <span style=${{display:'inline-flex',alignItems:'center'}}>
+      ${step===0 && !taken && html`<${Button} type="primary" icon=${html`<${I.NumberOutlined}/>`} onClick=${take}>取號存檔<//><${Mk} n=${6}/>`}
+      ${(step>0 || taken) && step<last && html`<${Button} type="primary" onClick=${()=>go(step+1)}>下一步：${STEP_FIELDS[step+1].title} <${I.RightOutlined}/><//>`}
+      ${step===last && html`<${Button} type="primary" icon=${html`<${I.SaveOutlined}/>`} onClick=${finish}>完成存檔<//>`}
+    </span>
+  </div>`;
+
+  return html`<div className="formwrap">
+    ${summary}
+    <div className="steps-wrap"><${Steps} size="small" current=${step} items=${stepItems}
+      onChange=${i=>{ if(i===0||taken) go(i); }}/><${Mk} n=${7}/></div>
+    <${Form} layout="vertical" form=${form} onValuesChange=${(_,all)=>setVals(all)}>
+      <div style=${{display: step===0?'block':'none'}}>${step1}</div>
+      ${STEP_FIELDS.slice(1).map((s,k)=>html`<div key=${k} style=${{display: step===k+1?'block':'none'}}>
+        <${Row} gutter=${16}>${s.fields.map(field)}<//>
+      </div>`)}
+    <//>
+    ${nav}
+    <${PickModal} open=${!!modal} kind=${modal||'sup'} autoList=${true} onClose=${()=>setModal(null)}
+      onPick=${r=>{ if(modal==='item'){ form.setFieldValue('substitute', r.code); setVals(form.getFieldsValue()); } else set('party', r.code); setModal(null); }}/>
+  </div>`;
+}
+
+/* ---------- 外框 ---------- */
+const menuItems = [
+  {key:'dash', icon:html`<${I.DashboardOutlined}/>`, label:'儀表板'},
+  {key:'sys', icon:html`<${I.SettingOutlined}/>`, label:'系統設定', children:[{key:'plant',label:'工廠別'},{key:'codes',label:'代碼表'}]},
+  {key:'base', icon:html`<${I.DatabaseOutlined}/>`, label:'基本檔', children:[
+    {key:'items', label:'貨號', children:['原料','物料','包材','半成品','成品','混料','其他','全部貨號'].map((t,i)=>({key:i?'it'+i:'raw',label:t}))},
+    {key:'itemset', label:'貨號設定', children:[{key:'cat',label:'貨號分類'},{key:'form',label:'型態分類'},{key:'unit',label:'計量單位'}]},
+    {key:'rd', label:'研發參數', children:[{key:'nu',label:'營養素'},{key:'dv',label:'每日參考值'},{key:'dose',label:'劑型'},{key:'dspec',label:'劑型規格'},{key:'func',label:'功能對照表'}]},
+    {key:'wh', label:'倉庫'},
+    {key:'phr', label:'欄位片語（未完成）'},
+    {key:'fin', label:'財務設定', children:[{key:'cus',label:'客戶'},{key:'sup',label:'供應商'},{key:'term',label:'收付款條件'},{key:'cur',label:'幣別'},{key:'fx',label:'匯率'},{key:'bank',label:'匯款銀行'}]},
+  ]},
+  {key:'plm', icon:html`<${I.ExperimentOutlined}/>`, label:'PLM 研發', children:[
+    {key:'qr',label:'客戶需求單'},{key:'ma',label:'配方估價單'},{key:'me',label:'報價單'},{key:'mb',label:'打樣單'},{key:'mr',label:'研發調料申請'},{key:'nc',label:'營養素計算單'}]},
+];
+
+const LogoMark = html`<svg width="26" height="22" viewBox="0 0 26 22" aria-hidden="true">
+  <rect x="0" y="6" width="10" height="10" fill="#EBCA23"/><rect x="8" y="0" width="8" height="8" fill="#fff"/>
+  <rect x="12" y="10" width="8" height="8" fill="#EBCA23"/><rect x="18" y="4" width="6" height="6" fill="#fff"/></svg>`;
+
+const MENU_LINKS = {raw:'原料清單_示意.html', it1:'物料清單_示意.html', it2:'包材清單_示意.html', it3:'半成品清單_示意.html'};
+
+function App(){
+  const [mode, setModeRaw] = useState(INIT_MODE);
+  const [showMk, setShowMk] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const setMode = m => { setModeRaw(m); history.replaceState(null, '', pageUrl(THIS_PAGE, m)); };
+  curMode = mode;
+  const theme = {
+    token:{ colorPrimary:'#EBCA23', colorText:'#3D3A39', colorBorder:'#EAE3D5', borderRadius:8, colorLink:'#B8961A' },
+    components:{
+      Button:{ primaryColor:'#3D3A39', fontWeight:500, primaryShadow:'none' },
+      Menu:{ darkItemBg:'#3D3A39', darkSubMenuItemBg:'#2A2726', darkItemSelectedBg:'rgba(235,202,35,.18)',
+        darkItemSelectedColor:'#EBCA23', darkItemColor:'rgba(255,255,255,.72)', darkItemHoverColor:'#fff', itemMarginInline:4, itemBorderRadius:10 },
+      Tabs:{ itemSelectedColor:'#EBCA23', inkBarColor:'#EBCA23', itemHoverColor:'#C9A91B' },
+      Layout:{ siderBg:'#3D3A39', bodyBg:'#F7F5F1' },
+    }
+  };
+  return html`<${ConfigProvider} theme=${theme} button=${{autoInsertSpace:false}}>
+  <${Layout} style=${{minHeight:'100vh'}} className=${showMk && mode==='建議版' ? '' : 'hide-mk'}>
+    <${Layout.Sider} width=${200} style=${{background:'#3D3A39'}}>
+      <div className="logo" title="回示意頁首頁" style=${{cursor:'pointer'}} onClick=${()=>{ window.location.href = 'index.html'; }}><div className="logo-in">
+        <div className="logo-mark">${LogoMark}<b>BKE</b></div>
+        <div className="logo-name">百達醫系統</div>
+      </div></div>
+      <${Menu} theme="dark" mode="inline" items=${menuItems} defaultOpenKeys=${['base','items']} selectedKeys=${['it3']}
+        onClick=${({key})=>{ if(key==='it3') goList(); else if(MENU_LINKS[key]) window.location.href = pageUrl(MENU_LINKS[key], mode); else message.info('這頁還沒做示意頁'); }} style=${{background:'#3D3A39', borderInlineEnd:0}}/>
+    <//>
+    <${Layout}>
+      <div className="hdr">
+        <${I.MenuFoldOutlined} style=${{fontSize:16}}/>
+        <h1>半成品</h1>
+        <${I.BellOutlined} style=${{fontSize:16}}/>
+        <span className="user"><${Avatar} size=${24} icon=${html`<${I.UserOutlined}/>`}/>demo01（業務、業助）</span>
+      </div>
+      <div className="content">
+        ${mode==='現況' ? html`<div className="toolbar">
+          <${Button} disabled icon=${html`<${I.SearchOutlined}/>`}>查詢<//>
+          <${Button} disabled icon=${html`<${I.ReloadOutlined}/>`}>重新整理<//>
+          <${Button} disabled icon=${html`<${I.PlusOutlined}/>`}>新增<//>
+          <${Button} disabled icon=${html`<${I.SaveOutlined}/>`}>存檔<//>
+          <${Button} icon=${html`<${I.CloseOutlined}/>`} onClick=${()=>goList()}>取消<//>
+          <${Button} disabled icon=${html`<${I.DeleteOutlined}/>`}>刪除<//>
+          <${Button} disabled icon=${html`<${I.FileExcelOutlined}/>`}>導出<//>
+          <${Button} disabled icon=${html`<${I.PrinterOutlined}/>`}>列印<//>
+          <span className="sp"></span>
+          <${Tag} color="gold">新增中<//>
+        </div>` : html`<div className="dhead">
+          <div className="dleft">
+            <div><span className="back" onClick=${()=>goList()}><${I.ArrowLeftOutlined}/>半成品清單</span><${Mk} n=${12}/></div>
+            <div className="dtitle">新增半成品</div>
+          </div>
+          <${Button} onClick=${()=>goList()}>取消<//>
+        </div>`}
+        ${mode==='現況' ? html`<${Current} key="cur"/>` : html`<${Proposed} key="new"/>`}
+      </div>
+    <//>
+  <//>
+  <div className="panel">
+    <div className="panel-h">
+      <${Segmented} size="small" value=${mode} onChange=${setMode} options=${['現況','建議版']}/>
+      <span className="sp"></span>
+      ${mode==='建議版' && html`<${Checkbox} checked=${showMk} onChange=${e=>setShowMk(e.target.checked)}>標註<//>`}
+      <${Button} size="small" type="text" icon=${html`<${panelOpen?I.DownOutlined:I.UpOutlined}/>`} onClick=${()=>setPanelOpen(!panelOpen)}/>
+    </div>
+    ${panelOpen && mode==='建議版' && html`<div className="panel-b"><ol>
+      ${CHANGES.map((c,i)=>html`<li key=${i}><span className="mk">${i+1}</span><span>${c}</span></li>`)}
+    </ol></div>`}
+    ${panelOpen && mode==='現況' && html`<div className="panel-b">目前系統畫面（2026-11-26）。</div>`}
+  </div>
+  <//>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
