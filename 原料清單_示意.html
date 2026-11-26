@@ -184,6 +184,7 @@ const CHANGES = [
   '瀏覽時直接顯示文字，不用灰色輸入框，沒填的顯示「—」；按「編輯」才變成輸入框，按鈕換成取消、存檔。',
   '頁籤跟新增的 6 個步驟一樣；「營養成分」頁籤併進「營養／標示」。',
   '營養標示用公版表格顯示（同新增頁）；原本營養標示欄位顯示成「[object Object]」。',
+  '「定量成分」「機能成分」是同一件事，併成一格「定量／機能成分」；已有資料要合併搬過來，不能直接刪掉其中一欄。',
 ];
 const Mk = ({n}) => html`<${Tooltip} title=${CHANGES[n-1]}><span className="mk">${n}</span></${Tooltip}>`;
 const th = (text, n) => n ? html`<span className="th">${text}<${Mk} n=${n}/></span>` : text;
@@ -422,7 +423,7 @@ function NewDetail({row, onBack}){
   const d = has ? DETAIL : (row.extra || {});
   // 欄位：瀏覽顯示文字；編輯時變輸入框（lock＝建檔後不能改，編輯時也只顯示文字）
   const v = (label, value, o={}) => html`<${Col} key=${label} span=${(o.span||1)*4}><div className="vf">
-    <div className="k">${label}</div>
+    <div className="k">${label}${o.mk ? html`<${Mk} n=${o.mk}/>` : ''}</div>
     ${edit && !o.lock
       ? (o.ta ? html`<${Input.TextArea} defaultValue=${value||''} autoSize=${{minRows:2, maxRows:8}}/>` : html`<${Input} defaultValue=${value||''}/>`)
       : html`<div className="v">${(value===undefined || value===null || value==='') ? '—' : value}</div>`}
@@ -457,7 +458,7 @@ function NewDetail({row, onBack}){
       <${NutLabel} has=${has} edit=${edit}/>
       <${Row} gutter=${16}>
         ${v('其他功效說明', d.effect, {span:3, ta:true})}${v('成分展開', d.ingredients, {span:3, ta:true})}
-        ${v('定量成分', '', {span:3, ta:true})}${v('機能成分', d.functional, {span:3, ta:true})}
+        ${v('定量／機能成分', d.functional, {span:6, ta:true, mk:13})}
       <//>
     </div>`},
     {key:'l', label:'法規／智財', children: html`<${Row} gutter=${16}>

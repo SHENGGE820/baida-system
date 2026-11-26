@@ -164,6 +164,7 @@ const CHANGES = [
   '「每份」「每 100 公克」兩欄都能直接填，填一欄另一欄自動換算；系統一律換算成每 100 公克存檔。',
   '每一份量、本包裝含幾份直接填在表格上方，跟公版同位置（「每一份量」「份量單位」併成一格）；填了每一份量，每份欄才能填。',
   '最上方改成「← 原料清單」和「新增原料」，跟原料清單、打開一筆同一種排法；原本那排按鈕新增時大多是灰的。「取消」回清單，完成存檔後回清單並打開剛建的那筆。',
+  '「定量成分」「機能成分」是同一件事，併成一格「定量／機能成分」；已有資料要合併搬過來，不能直接刪掉其中一欄。',
 ];
 const Mk = ({n}) => html`<${Tooltip} title=${CHANGES[n-1]}><span className="mk">${n}</span></${Tooltip}>`;
 
@@ -387,8 +388,7 @@ const STEP_FIELDS = [
   ], after:[
     {name:'effect', label:'其他功效說明', type:'ta', rows:3, span:3},
     {name:'ingredients', label:'成分展開', type:'ta', rows:3, span:3},
-    {name:'quant', label:'定量成分', type:'ta', rows:3, span:3},
-    {name:'functional', label:'機能成分', type:'ta', rows:3, span:3},
+    {name:'functional', label:'定量／機能成分', type:'ta', rows:3, span:6, mk:25},
   ]},
   {title:'法規／智財', fields:[
     {name:'law', label:'法規', type:'ta', rows:4, span:6},
